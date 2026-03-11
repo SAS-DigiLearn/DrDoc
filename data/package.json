@@ -1,0 +1,21 @@
+{
+  "scripts": {
+  "build": "node tools/build-knowledge.js"
+}
+  "name": "document-search-bot",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "pdfjs-dist": "^3.11.174",
+    "mammoth": "^1.4.2",
+    "fuzzysort": "^2.0.4",
+    "fuse.js": "^6.6.2",
+    "compromise": "^14.0.0"
+  }
+}
