@@ -82,52 +82,92 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
+
 <script>
-  const messagesDiv = document.getElementById('messages');
+const messagesDiv = document.getElementById('messages');
+let knowledge = [];
 
-  function appendMessage(text, sender) {
-    const msg = document.createElement('div');
-    msg.className = 'message ' + sender;
-
-    // Sanitize HTML from backend (prevents XSS)
-    const safeHTML = DOMPurify.sanitize(text);
-    msg.innerHTML = safeHTML;
-
-    messagesDiv.appendChild(msg);
-  }
-
-  async function handleUserQuestion() {
-    const input = document.getElementById('userInput');
-    const query = input.value.trim();
-    if (!query) return;
-    appendMessage(query, 'user');
-    input.value = '';
-
-    try {
-      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-      const data = await response.json();
-     if (data.results.length > 0) {
-  data.results.slice(0, 2).forEach((result, index) => {
-    appendMessage(`<div>
-      <p><b>Result ${index + 1}:</b> ${result.content}</p>
-      <small><b>${result.filename}</b> - paragraph ${result.paragraph}</small>
-      ${index < 1 ? '<hr>' : ''}
-    </div>`, 'bot');
-  });
-} else {
-  appendMessage("Sorry, I couldn't find anything related.", 'bot');
+async function loadKnowledge() {
+  const res = await fetch('./data/knowledge.json');
+  knowledge = await res.json();
 }
-    } catch (err) {
-      appendMessage("Error fetching results.", 'bot');
-    }
-  }
 
-  document.getElementById('userInput').addEventListener("keypress", function(event) {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      handleUserQuestion();
-    }
+loadKnowledge();
+
+function appendMessage(text, sender) {
+  const msg = document.createElement('div');
+  msg.className = 'message ' + sender;
+  const safeHTML = DOMPurify.sanitize(text);
+  msg.innerHTML = safeHTML;
+  messagesDiv.appendChild(msg);
+}
+
+function scoreResult(text, keywords) {
+  let score = 0;
+  const lower = text.toLowerCase();
+
+  keywords.forEach(k => {
+    if (lower.includes(k)) score += 5;
   });
+
+  return score;
+}
+
+function highlight(text, keywords) {
+  keywords.forEach(k => {
+    const regex = new RegExp(`(${k})`, 'gi');
+    text = text.replace(regex, '<span class="highlight">$1</span>');
+  });
+  return text;
+}
+
+async function handleUserQuestion() {
+  const input = document.getElementById('userInput');
+  const query = input.value.trim();
+  if (!query) return;
+
+  appendMessage(query, 'user');
+  input.value = '';
+
+  const keywords = query.toLowerCase().split(/\s+/);
+
+  const scored = knowledge.map(p => ({
+    ...p,
+    score: scoreResult(p.content, keywords)
+  }))
+  .filter(r => r.score > 0)
+  .sort((a,b)=>b.score-a.score)
+  .slice(0,2);
+
+  if (scored.length > 0) {
+    scored.forEach((result, index) => {
+
+      const sentences = result.content.match(/[^.!?]+[.!?]+/g) || [result.content];
+      const bestSentence = sentences.find(s =>
+        keywords.some(k => s.toLowerCase().includes(k))
+      ) || sentences[0];
+
+      const highlighted = highlight(bestSentence, keywords);
+
+      appendMessage(`<div>
+        <p><b>Result ${index + 1}:</b> ${highlighted}</p>
+        <small><b>${result.filename}</b> - paragraph ${result.paragraph}</small>
+        ${index < 1 ? '<hr>' : ''}
+      </div>`, 'bot');
+
+    });
+
+  } else {
+    appendMessage("Sorry, I couldn't find anything related.", 'bot');
+  }
+}
+
+document.getElementById('userInput').addEventListener("keypress", function(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    handleUserQuestion();
+  }
+});
 </script>
 
 </body>
