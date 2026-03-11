@@ -1,4 +1,7 @@
 {
+  "scripts": {
+  "build": "node tools/build-knowledge.js"
+}
   "name": "document-search-bot",
   "version": "1.0.0",
   "type": "module",
