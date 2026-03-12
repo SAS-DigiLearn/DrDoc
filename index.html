@@ -33,21 +33,6 @@ const messagesDiv = document.getElementById('messages');
 let knowledge = [];
 let embedder;
 
-/* LOAD KNOWLEDGE */
-async function loadKnowledge() {
-  const res = await fetch('./data/knowledge.json');
-  knowledge = await res.json();
-}
-await loadKnowledge();
-
-/* LOAD EMBEDDING MODEL */
-async function initEmbedder() {
-  appendMessage("Loading embedding model…", "bot");
-  embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
-  appendMessage("Model loaded! You can ask questions now.", "bot");
-}
-await initEmbedder();
-
 /* CHAT UI */
 function appendMessage(text, sender) {
   const msg = document.createElement('div');
@@ -59,17 +44,17 @@ function appendMessage(text, sender) {
 
 /* COSINE SIMILARITY */
 function cosineSim(a, b) {
-  let dot = 0, normA = 0, normB = 0;
-  for (let i=0;i<a.length;i++){
+  let dot=0, normA=0, normB=0;
+  for(let i=0;i<a.length;i++){
     dot += a[i]*b[i];
     normA += a[i]*a[i];
     normB += b[i]*b[i];
   }
-  return dot / (Math.sqrt(normA) * Math.sqrt(normB) + 1e-8);
+  return dot / (Math.sqrt(normA)*Math.sqrt(normB)+1e-8);
 }
 
 /* HIGHLIGHT TERMS */
-function highlight(text, query) {
+function highlight(text, query){
   const words = query.split(/\s+/);
   words.forEach(w=>{
     const regex = new RegExp(`(${w})`, 'gi');
@@ -78,24 +63,48 @@ function highlight(text, query) {
   return text;
 }
 
+/* LOAD KNOWLEDGE JSON */
+async function loadKnowledge(){
+  appendMessage("Loading documents…", "bot");
+  const res = await fetch('./data/knowledge.json');
+  const raw = await res.json();
+  knowledge = raw.map((chunk,i)=>({
+    ...chunk,
+    embedding: null  // Embedding will be generated in-browser
+  }));
+}
+
+/* LOAD EMBEDDING MODEL */
+async function initEmbedder(){
+  appendMessage("Loading embedding model…", "bot");
+  embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+  appendMessage("Model loaded! Generating embeddings…", "bot");
+
+  // Generate embeddings for each paragraph dynamically
+  for(let i=0;i<knowledge.length;i++){
+    knowledge[i].embedding = Array.from((await embedder(knowledge[i].text,{pooling:"mean",normalize:true})).data);
+    if(i%10===0) appendMessage(`Embedded paragraph ${i+1}/${knowledge.length}`, "bot");
+  }
+  appendMessage("All embeddings generated! You can ask questions now.", "bot");
+}
+
 /* SEMANTIC SEARCH */
 function semanticSearch(queryVector, queryText, topN=3){
   const scored = knowledge.map(chunk=>{
-    const semanticScore = cosineSim(queryVector, chunk.embedding);
-    // Optional: small keyword boost
-    let keywordScore = 0;
+    const semScore = cosineSim(queryVector, chunk.embedding);
+    let keywordScore=0;
     queryText.toLowerCase().split(/\s+/).forEach(k=>{
       if(chunk.text.toLowerCase().includes(k)) keywordScore+=0.1;
     });
-    return {...chunk, score: semanticScore + keywordScore};
+    return {...chunk, score: semScore + keywordScore};
   });
   scored.sort((a,b)=>b.score-a.score);
   return scored.slice(0,topN);
 }
 
-/* EMBED QUERY USING TRANSFORMER */
+/* EMBED QUERY */
 async function embedQuery(text){
-  const result = await embedder(text, { pooling: "mean", normalize: true });
+  const result = await embedder(text, { pooling:"mean", normalize:true });
   return Array.from(result.data);
 }
 
@@ -108,18 +117,13 @@ async function handleUserQuestion(){
   appendMessage(query,'user');
   input.value='';
 
-  // Compute query embedding in-browser
   const queryVector = await embedQuery(query);
-
   const results = semanticSearch(queryVector, query, 3);
 
   if(results.length){
     results.forEach((res,idx)=>{
-      const sentences = res.text.match(/[^.!?]+[.!?]+/g) || [res.text];
-      const bestSentence = sentences.find(s =>
-        query.toLowerCase().split(/\s+/).some(k => s.toLowerCase().includes(k))
-      ) || sentences[0];
-
+      const sentences = res.text.match(/[^.!?]+[.!?]+/g)||[res.text];
+      const bestSentence = sentences.find(s=> query.toLowerCase().split(/\s+/).some(k=>s.toLowerCase().includes(k))) || sentences[0];
       const highlighted = highlight(bestSentence, query);
 
       appendMessage(`<div>
@@ -135,11 +139,12 @@ async function handleUserQuestion(){
 
 /* ENTER KEY */
 document.getElementById('userInput').addEventListener("keypress", function(event){
-  if(event.key==="Enter"){
-    event.preventDefault();
-    handleUserQuestion();
-  }
+  if(event.key==="Enter"){ event.preventDefault(); handleUserQuestion(); }
 });
+
+/* INITIALIZE */
+await loadKnowledge();
+await initEmbedder();
 
 </script>
 </body>
