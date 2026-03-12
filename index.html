@@ -1,85 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>McHelpie</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f8f9fa;
-      padding: 10px;
-    }
-    #chatbox {
-      background: white;
-      max-width: 800px;
-      margin: auto;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    .welcome {
-      background-color: #b91e71;
-      color: #fff;
-      text-align: left;
-      padding: 10px;
-      border-radius: 5px;
-    }
-    .message {
-      margin: 10px 0;
-      padding: 10px;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-    }
-    .bot {
-      background-color: #FCE8F2;
-      color: #000;
-      text-align: left;
-      margin-right: 10%;
-    }
-    .user {
-      background-color: #e9ecef;
-      color: #212529;
-      text-align: right;
-      margin-left: 10%;
-    }
-    .buttons {
-      margin-top: 10px;
-      text-align: center;
-    }
-    button {
-      padding: 8px 15px;
-      margin: 5px;
-      background-color: #b91e71;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .tip-image {
-      max-width: 100%;
-      border-radius: 8px;
-      margin-top: 5px;
-    }
-    input[type="text"] {
-      padding: 10px;
-      width: 70%;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    .highlight {
-      font-weight: bold;
-      
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>McHelpie</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+  padding: 10px;
+}
+#chatbox {
+  background: white;
+  max-width: 800px;
+  margin: auto;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.message {
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+}
+.bot {
+  background-color: #FCE8F2;
+  color: #000;
+  text-align: left;
+  margin-right: 10%;
+}
+.user {
+  background-color: #e9ecef;
+  color: #212529;
+  text-align: right;
+  margin-left: 10%;
+}
+button {
+  padding: 8px 15px;
+  margin: 5px;
+  background-color: #b91e71;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+input[type="text"] {
+  padding: 10px;
+  width: 70%;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+.highlight {
+  font-weight: bold;
+  background-color: #fff3cd;
+}
+</style>
 </head>
 <body>
-  <div id="chatbox">
-    <div class="message bot">Hi! I'm <strong>McHelpie</strong>. What can I help you with today?</div>
-    <div id="messages"></div>
-    <input type="text" id="userInput" placeholder="Type your question here">
-    <button onclick="handleUserQuestion()">Send</button>
-  </div>
+<div id="chatbox">
+  <div class="message bot">Hi! I'm <strong>McHelpie</strong>. What can I help you with today?</div>
+  <div id="messages"></div>
+  <input type="text" id="userInput" placeholder="Type your question here">
+  <button onclick="handleUserQuestion()">Send</button>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
 
@@ -92,77 +76,69 @@ async function loadKnowledge() {
   const res = await fetch('./data/knowledge.json');
   knowledge = await res.json();
 }
-
 loadKnowledge();
 
 /* CHAT UI */
 function appendMessage(text, sender) {
   const msg = document.createElement('div');
   msg.className = 'message ' + sender;
-  const safeHTML = DOMPurify.sanitize(text);
-  msg.innerHTML = safeHTML;
+  msg.innerHTML = DOMPurify.sanitize(text);
   messagesDiv.appendChild(msg);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
 /* COSINE SIMILARITY */
 function cosineSim(a, b) {
   let dot = 0, normA = 0, normB = 0;
-
   for (let i = 0; i < a.length; i++) {
     dot += a[i] * b[i];
-    normA += a[i] * a[i];
-    normB += b[i] * b[i];
+    normA += a[i]*a[i];
+    normB += b[i]*b[i];
   }
-
-  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+  return dot / (Math.sqrt(normA) * Math.sqrt(normB) + 1e-8);
 }
 
-/* SIMPLE LOCAL EMBEDDING (fallback approximation)
-   Uses keyword hashing so it works fully offline */
+/* SIMPLE KEYWORD EMBEDDING (offline fallback) */
 function embed(text) {
-  const vector = new Array(128).fill(0);
+  const vec = new Array(128).fill(0);
   const words = text.toLowerCase().split(/\W+/);
-
   words.forEach(word => {
     let hash = 0;
-    for (let i = 0; i < word.length; i++) {
-      hash = (hash << 5) - hash + word.charCodeAt(i);
-      hash |= 0;
+    for (let i=0;i<word.length;i++){
+      hash=(hash<<5)-hash+word.charCodeAt(i);
+      hash|=0;
     }
-    vector[Math.abs(hash) % vector.length] += 1;
+    vec[Math.abs(hash)%vec.length]+=1;
   });
-
-  return vector;
+  return vec;
 }
 
 /* HIGHLIGHT MATCHED TERMS */
 function highlight(text, query) {
   const words = query.split(/\s+/);
-
-  words.forEach(w => {
-    const regex = new RegExp(`(${w})`, 'gi');
-    text = text.replace(regex,'<span class="highlight">$1</span>');
+  words.forEach(w=>{
+    const regex=new RegExp(`(${w})`,'gi');
+    text=text.replace(regex,'<span class="highlight">$1</span>');
   });
-
   return text;
 }
 
-/* SEMANTIC SEARCH */
-function semanticSearch(queryVector, topN=3){
-
-  const scored = knowledge.map(chunk => ({
-    ...chunk,
-    score: cosineSim(queryVector, chunk.embedding)
-  }));
-
+/* HYBRID SEMANTIC SEARCH */
+function semanticSearch(queryVector, queryText, topN=3){
+  const scored = knowledge.map(chunk=>{
+    const semanticScore = cosineSim(queryVector, chunk.embedding);
+    let keywordScore = 0;
+    queryText.toLowerCase().split(/\s+/).forEach(k=>{
+      if(chunk.text.toLowerCase().includes(k)) keywordScore+=0.5;
+    });
+    return {...chunk, score: semanticScore + keywordScore};
+  });
   scored.sort((a,b)=>b.score-a.score);
-
   return scored.slice(0,topN);
 }
 
 /* HANDLE QUESTION */
-async function handleUserQuestion(){
-
+async function handleUserQuestion() {
   const input = document.getElementById('userInput');
   const query = input.value.trim();
   if(!query) return;
@@ -170,38 +146,31 @@ async function handleUserQuestion(){
   appendMessage(query,'user');
   input.value='';
 
-  const queryVector = embed(query);
+  const queryVector = embed(query); // fallback offline embedding
 
-  const results = semanticSearch(queryVector,3);
+  const results = semanticSearch(queryVector, query, 3);
 
   if(results.length){
-
-    results.forEach((result,index)=>{
-
-      const sentences = result.text.match(/[^.!?]+[.!?]+/g) || [result.text];
-
-      const bestSentence = sentences[0];
-
-      const highlighted = highlight(bestSentence,query);
-
+    results.forEach((res,idx)=>{
+      const sentences = res.text.match(/[^.!?]+[.!?]+/g) || [res.text];
+      const bestSentence = sentences.find(s =>
+        query.toLowerCase().split(/\s+/).some(k => s.toLowerCase().includes(k))
+      ) || sentences[0];
+      const highlighted = highlight(bestSentence, query);
       appendMessage(`<div>
-        <p><b>Result ${index+1}:</b> ${highlighted}</p>
-        <small><b>${result.source}</b> – ${result.section}</small>
-        ${index < results.length-1 ? '<hr>' : ''}
+        <p><b>Result ${idx+1}:</b> ${highlighted}</p>
+        <small><b>${res.source}</b> – ${res.section}</small>
+        ${idx < results.length-1 ? '<hr>' : ''}
       </div>`,'bot');
-
     });
-
   } else {
-
     appendMessage("Sorry, I couldn't find anything related.", 'bot');
-
   }
 }
 
 /* ENTER KEY */
-document.getElementById('userInput').addEventListener("keypress", function(event) {
-  if (event.key === "Enter") {
+document.getElementById('userInput').addEventListener("keypress", function(event){
+  if(event.key==="Enter"){
     event.preventDefault();
     handleUserQuestion();
   }
