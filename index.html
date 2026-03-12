@@ -81,12 +81,13 @@
     <button onclick="handleUserQuestion()">Send</button>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
 
 <script>
 const messagesDiv = document.getElementById('messages');
 let knowledge = [];
 
+/* LOAD KNOWLEDGE */
 async function loadKnowledge() {
   const res = await fetch('./data/knowledge.json');
   knowledge = await res.json();
@@ -94,6 +95,7 @@ async function loadKnowledge() {
 
 loadKnowledge();
 
+/* CHAT UI */
 function appendMessage(text, sender) {
   const msg = document.createElement('div');
   msg.className = 'message ' + sender;
@@ -102,66 +104,102 @@ function appendMessage(text, sender) {
   messagesDiv.appendChild(msg);
 }
 
-function scoreResult(text, keywords) {
-  let score = 0;
-  const lower = text.toLowerCase();
+/* COSINE SIMILARITY */
+function cosineSim(a, b) {
+  let dot = 0, normA = 0, normB = 0;
 
-  keywords.forEach(k => {
-    if (lower.includes(k)) score += 5;
-  });
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i];
+    normA += a[i] * a[i];
+    normB += b[i] * b[i];
+  }
 
-  return score;
+  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
-function highlight(text, keywords) {
-  keywords.forEach(k => {
-    const regex = new RegExp(`(${k})`, 'gi');
-    text = text.replace(regex, '<span class="highlight">$1</span>');
+/* SIMPLE LOCAL EMBEDDING (fallback approximation)
+   Uses keyword hashing so it works fully offline */
+function embed(text) {
+  const vector = new Array(128).fill(0);
+  const words = text.toLowerCase().split(/\W+/);
+
+  words.forEach(word => {
+    let hash = 0;
+    for (let i = 0; i < word.length; i++) {
+      hash = (hash << 5) - hash + word.charCodeAt(i);
+      hash |= 0;
+    }
+    vector[Math.abs(hash) % vector.length] += 1;
   });
+
+  return vector;
+}
+
+/* HIGHLIGHT MATCHED TERMS */
+function highlight(text, query) {
+  const words = query.split(/\s+/);
+
+  words.forEach(w => {
+    const regex = new RegExp(`(${w})`, 'gi');
+    text = text.replace(regex,'<span class="highlight">$1</span>');
+  });
+
   return text;
 }
 
-async function handleUserQuestion() {
+/* SEMANTIC SEARCH */
+function semanticSearch(queryVector, topN=3){
+
+  const scored = knowledge.map(chunk => ({
+    ...chunk,
+    score: cosineSim(queryVector, chunk.embedding)
+  }));
+
+  scored.sort((a,b)=>b.score-a.score);
+
+  return scored.slice(0,topN);
+}
+
+/* HANDLE QUESTION */
+async function handleUserQuestion(){
+
   const input = document.getElementById('userInput');
   const query = input.value.trim();
-  if (!query) return;
+  if(!query) return;
 
-  appendMessage(query, 'user');
-  input.value = '';
+  appendMessage(query,'user');
+  input.value='';
 
-  const keywords = query.toLowerCase().split(/\s+/);
+  const queryVector = embed(query);
 
-  const scored = knowledge.map(p => ({
-    ...p,
-    score: scoreResult(p.content, keywords)
-  }))
-  .filter(r => r.score > 0)
-  .sort((a,b)=>b.score-a.score)
-  .slice(0,2);
+  const results = semanticSearch(queryVector,3);
 
-  if (scored.length > 0) {
-    scored.forEach((result, index) => {
+  if(results.length){
 
-      const sentences = result.content.match(/[^.!?]+[.!?]+/g) || [result.content];
-      const bestSentence = sentences.find(s =>
-        keywords.some(k => s.toLowerCase().includes(k))
-      ) || sentences[0];
+    results.forEach((result,index)=>{
 
-      const highlighted = highlight(bestSentence, keywords);
+      const sentences = result.text.match(/[^.!?]+[.!?]+/g) || [result.text];
+
+      const bestSentence = sentences[0];
+
+      const highlighted = highlight(bestSentence,query);
 
       appendMessage(`<div>
-        <p><b>Result ${index + 1}:</b> ${highlighted}</p>
-        <small><b>${result.filename}</b> - paragraph ${result.paragraph}</small>
-        ${index < 1 ? '<hr>' : ''}
-      </div>`, 'bot');
+        <p><b>Result ${index+1}:</b> ${highlighted}</p>
+        <small><b>${result.source}</b> – ${result.section}</small>
+        ${index < results.length-1 ? '<hr>' : ''}
+      </div>`,'bot');
 
     });
 
   } else {
+
     appendMessage("Sorry, I couldn't find anything related.", 'bot');
+
   }
 }
 
+/* ENTER KEY */
 document.getElementById('userInput').addEventListener("keypress", function(event) {
   if (event.key === "Enter") {
     event.preventDefault();
@@ -169,6 +207,5 @@ document.getElementById('userInput').addEventListener("keypress", function(event
   }
 });
 </script>
-
 </body>
 </html>
