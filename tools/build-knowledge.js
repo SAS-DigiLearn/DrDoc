@@ -1,13 +1,14 @@
 import fs from "fs";
 import mammoth from "mammoth";
 import pdf from "pdf-parse";
+import cheerio from "cheerio";
 
 const dataDir = "./docs";
 const output = "./data/knowledge.json";
 
 let paragraphs = [];
 
-/* ---------------- IMAGE MARKER SUPPORT ---------------- */
+/* ---------- IMAGE MARKER SUPPORT ---------- */
 
 function extractImage(text) {
   const match = text.match(/\[image:(.*?)\]/i);
@@ -19,48 +20,42 @@ function removeImageMarker(text) {
   return text.replace(/\[image:.*?\]/i, "").trim();
 }
 
-/* ---------------- DOCX EXTRACTION ---------------- */
+/* ---------- DOCX EXTRACTION ---------- */
 
 async function extractDOCX(file) {
 
   const result = await mammoth.convertToHtml({ path: file });
 
-  const html = result.value;
-
-  const blocks = html.split(/(<table[\s\S]*?<\/table>)/g);
+  const $ = cheerio.load(result.value);
 
   let parsed = [];
+  let index = 1;
 
-  blocks.forEach(block => {
+  $("p, table").each((i, el) => {
 
-    if (block.startsWith("<table")) {
+    if (el.tagName === "p") {
+
+      const text = $(el).text().trim();
+      if (!text) return;
+
+      const image = extractImage(text);
+      const cleanText = removeImageMarker(text);
 
       parsed.push({
-        type: "table",
-        content: block
+        paragraph: index++,
+        type: "text",
+        content: cleanText,
+        image: image
       });
 
-    } else {
+    }
 
-      const paras = block.split(/\n{2,}/);
+    if (el.tagName === "table") {
 
-      paras.forEach(p => {
-
-        const clean = p.replace(/<\/?[^>]+(>|$)/g, "").trim();
-
-        if (clean.length > 0) {
-
-          const image = extractImage(clean);
-          const text = removeImageMarker(clean);
-
-          parsed.push({
-            type: "text",
-            content: text,
-            image: image
-          });
-
-        }
-
+      parsed.push({
+        paragraph: index++,
+        type: "table",
+        content: $.html(el)
       });
 
     }
@@ -71,21 +66,25 @@ async function extractDOCX(file) {
 
 }
 
-/* ---------------- PDF EXTRACTION ---------------- */
+/* ---------- PDF EXTRACTION ---------- */
 
 async function extractPDF(file) {
 
   const dataBuffer = fs.readFileSync(file);
   const data = await pdf(dataBuffer);
 
-  return data.text.split(/\n{2,}/).map(p => ({
-    type: "text",
-    content: p.trim()
-  }));
+  return data.text
+    .split(/\n{2,}/)
+    .map((p, i) => ({
+      paragraph: i + 1,
+      type: "text",
+      content: p.trim()
+    }))
+    .filter(p => p.content.length > 0);
 
 }
 
-/* ---------------- MAIN BUILD ---------------- */
+/* ---------- MAIN BUILD ---------- */
 
 async function run() {
 
@@ -104,20 +103,16 @@ async function run() {
       items = await extractPDF(path);
     }
 
-    items.forEach((item, i) => {
-
-      if (!item.content) return;
+    items.forEach(item => {
 
       const entry = {
         filename: file,
-        paragraph: i + 1,
+        paragraph: item.paragraph,
         type: item.type,
         content: item.content
       };
 
-      if (item.image) {
-        entry.image = item.image;
-      }
+      if (item.image) entry.image = item.image;
 
       paragraphs.push(entry);
 
