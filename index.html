@@ -1,146 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>McHelpie</title>
-<style>
-body { font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 10px; }
-#chatbox { background: white; max-width: 800px; margin: auto; padding: 15px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-.message { margin: 10px 0; padding: 10px; border: 1px solid #dee2e6; border-radius: 8px; }
-.bot { background-color: #FCE8F2; color: #000; text-align: left; margin-right: 10%; }
-.user { background-color: #e9ecef; color: #212529; text-align: right; margin-left: 10%; }
-button { padding: 8px 15px; margin: 5px; background-color: #b91e71; color: white; border: none; border-radius: 5px; cursor: pointer; }
-input[type="text"] { padding: 10px; width: 70%; border-radius: 5px; border: 1px solid #ccc; }
-.highlight { font-weight: bold; background-color: #fff3cd; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>McHelpie</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      padding: 10px;
+    }
+    #chatbox {
+      background: white;
+      max-width: 800px;
+      margin: auto;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .welcome {
+      background-color: #b91e71;
+      color: #fff;
+      text-align: left;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .message {
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+    }
+    .bot {
+      background-color: #FCE8F2;
+      color: #000;
+      text-align: left;
+      margin-right: 10%;
+    }
+    .user {
+      background-color: #e9ecef;
+      color: #212529;
+      text-align: right;
+      margin-left: 10%;
+    }
+    .buttons {
+      margin-top: 10px;
+      text-align: center;
+    }
+    button {
+      padding: 8px 15px;
+      margin: 5px;
+      background-color: #b91e71;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .tip-image {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 5px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      width: 70%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .highlight {
+      font-weight: bold;
+      
+    }
+  </style>
 </head>
 <body>
+  <div id="chatbox">
+    <div class="message bot">Hi! I'm <strong>McHelpie</strong>. What can I help you with today?</div>
+    <div id="messages"></div>
+    <input type="text" id="userInput" placeholder="Type your question here">
+    <button onclick="handleUserQuestion()">Send</button>
+  </div>
 
-<div id="chatbox">
-  <div class="message bot">Hi! I'm <strong>McHelpie</strong>. What can I help you with today?</div>
-  <div id="messages"></div>
-  <input type="text" id="userInput" placeholder="Type your question here">
-  <button onclick="handleUserQuestion()">Send</button>
-</div>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
-<script type="module">
-
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers/dist/transformers.min.js';
-
+<script>
 const messagesDiv = document.getElementById('messages');
 let knowledge = [];
-let embedder;
 
-/* LOAD KNOWLEDGE (with prebuilt embeddings) */
 async function loadKnowledge() {
   const res = await fetch('./data/knowledge.json');
   knowledge = await res.json();
-  appendMessage(`Knowledge loaded: ${knowledge.length} chunks.`, 'bot');
 }
 
-/* LOAD EMBEDDING MODEL FOR QUERY ONLY */
-async function initEmbedder() {
-  appendMessage("Loading embedding model…", "bot");
-  embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
-  appendMessage("Model loaded! You can ask questions now.", "bot");
-}
+loadKnowledge();
 
-await loadKnowledge();
-await initEmbedder();
-
-/* CHAT UI */
 function appendMessage(text, sender) {
   const msg = document.createElement('div');
   msg.className = 'message ' + sender;
-  msg.innerHTML = DOMPurify.sanitize(text);
+  const safeHTML = DOMPurify.sanitize(text);
+  msg.innerHTML = safeHTML;
   messagesDiv.appendChild(msg);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
-/* COSINE SIMILARITY */
-function cosineSim(a, b) {
-  let dot = 0, normA = 0, normB = 0;
-  for (let i=0;i<a.length;i++){
-    dot += a[i]*b[i];
-    normA += a[i]*a[i];
-    normB += b[i]*b[i];
-  }
-  return dot / (Math.sqrt(normA) * Math.sqrt(normB) + 1e-8);
+function scoreResult(text, keywords) {
+  let score = 0;
+  const lower = text.toLowerCase();
+
+  keywords.forEach(k => {
+    if (lower.includes(k)) score += 5;
+  });
+
+  return score;
 }
 
-/* HIGHLIGHT TERMS */
-function highlight(text, query) {
-  const words = query.split(/\s+/);
-  words.forEach(w=>{
-    const regex = new RegExp(`(${w})`, 'gi');
-    text = text.replace(regex,'<span class="highlight">$1</span>');
+function highlight(text, keywords) {
+  keywords.forEach(k => {
+    const regex = new RegExp(`(${k})`, 'gi');
+    text = text.replace(regex, '<span class="highlight">$1</span>');
   });
   return text;
 }
 
-/* EMBED QUERY USING TRANSFORMER */
-async function embedQuery(text){
-  const result = await embedder(text, { pooling: "mean", normalize: true });
-  return Array.from(result.data);
-}
-
-/* SEMANTIC SEARCH AGAINST PREBUILT EMBEDDINGS */
-function semanticSearch(queryVector, queryText, topN=3){
-  const scored = knowledge.map(chunk=>{
-    const semanticScore = cosineSim(queryVector, chunk.embedding);
-    // optional: small keyword boost
-    let keywordScore = 0;
-    queryText.toLowerCase().split(/\s+/).forEach(k=>{
-      if(chunk.text.toLowerCase().includes(k)) keywordScore+=0.1;
-    });
-    return {...chunk, score: semanticScore + keywordScore};
-  });
-  scored.sort((a,b)=>b.score-a.score);
-  return scored.slice(0,topN);
-}
-
-/* HANDLE USER QUESTION */
-async function handleUserQuestion(){
+async function handleUserQuestion() {
   const input = document.getElementById('userInput');
   const query = input.value.trim();
-  if(!query) return;
+  if (!query) return;
 
-  appendMessage(query,'user');
-  input.value='';
+  appendMessage(query, 'user');
+  input.value = '';
 
-  const queryVector = await embedQuery(query);
-  const results = semanticSearch(queryVector, query, 3);
+  const keywords = query.toLowerCase().split(/\s+/);
 
-  if(results.length){
-    results.forEach((res,idx)=>{
-      const sentences = res.text.match(/[^.!?]+[.!?]+/g) || [res.text];
+  const scored = knowledge.map(p => ({
+    ...p,
+    score: scoreResult(p.content, keywords)
+  }))
+  .filter(r => r.score > 0)
+  .sort((a,b)=>b.score-a.score)
+  .slice(0,2);
+
+  if (scored.length > 0) {
+    scored.forEach((result, index) => {
+
+      const sentences = result.content.match(/[^.!?]+[.!?]+/g) || [result.content];
       const bestSentence = sentences.find(s =>
-        query.toLowerCase().split(/\s+/).some(k => s.toLowerCase().includes(k))
+        keywords.some(k => s.toLowerCase().includes(k))
       ) || sentences[0];
 
-      const highlighted = highlight(bestSentence, query);
+      const highlighted = highlight(bestSentence, keywords);
 
       appendMessage(`<div>
-        <p><b>Result ${idx+1}:</b> ${highlighted}</p>
-        <small><b>${res.source}</b> – ${res.section}</small>
-        ${idx<results.length-1?'<hr>':''}
-      </div>`,'bot');
+        <p><b>Result ${index + 1}:</b> ${highlighted}</p>
+        <small><b>${result.filename}</b> - paragraph ${result.paragraph}</small>
+        ${index < 1 ? '<hr>' : ''}
+      </div>`, 'bot');
+
     });
+
   } else {
     appendMessage("Sorry, I couldn't find anything related.", 'bot');
   }
 }
 
-/* ENTER KEY */
-document.getElementById('userInput').addEventListener("keypress", function(event){
-  if(event.key==="Enter"){
+document.getElementById('userInput').addEventListener("keypress", function(event) {
+  if (event.key === "Enter") {
     event.preventDefault();
     handleUserQuestion();
   }
 });
-
 </script>
+
 </body>
 </html>
