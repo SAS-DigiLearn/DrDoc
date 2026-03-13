@@ -59,5 +59,72 @@
     "paragraph": 10,
     "type": "text",
     "content": "Crews may only be disturbed from a rest break for clinically triaged ILT or major incidents. Dispatchers must try to divert other resources, but if no alternative within 10 minutes exists, the resting crew may be disturbed. After disturbance, they are only sent to PURPLE or major incidents until owed break time is recovered."
+  },
+  {
+    "filename": "Rest_Break_SOP1.docx",
+    "paragraph": 1,
+    "type": "text",
+    "content": "To ensure appropriate and effective rest break management of all resources booked onto the C3 System for deployment and to improve rest break compliance, working to the principle that nobody should work more than 6 hours without a break."
+  },
+  {
+    "filename": "Rest_Break_SOP1.docx",
+    "paragraph": 2,
+    "type": "text",
+    "content": "The definition of a rest break is a short period of time not less than 20 mins, undisturbed, which should not be taken at the commencement or end of the working day, where an employee is able to stop and relax, use facilities, or simply take time to clear their heads, therefore pause, and recharge."
+  },
+  {
+    "filename": "Rest_Break_SOP1.docx",
+    "paragraph": 3,
+    "type": "text",
+    "content": "Dispatchers within the Ambulance Control Centres (ACC) will be responsible for the consistent application of this Standard Operating Procedure. This applies to all operational colleagues booked onto the C3 system."
+  },
+  {
+    "filename": "Rest_Break_SOP1.docx",
+    "paragraph": 4,
+    "type": "text",
+    "content": "The Service gives an absolute commitment to providing breaks to all staff to whom this agreement applies. The SOP will apply to all Scottish Ambulance Service colleagues booked onto the C3 system for deployment."
+  },
+  {
+    "filename": "Rest_Break_SOP1.docx",
+    "paragraph": 5,
+    "type": "text",
+    "content": "This SOP looks to, organisationally, support Dispatchers within their decision making to balance operational colleague welfare and patient safety.  To assist in this process, the following procedure should be followed:"
+  },
+  {
+    "filename": "Rest_Break_SOP1.docx",
+    "paragraph": 6,
+    "type": "text",
+    "content": "Rest break windows vary by shift length: 8‑hour shifts have a window between hours 3–5; 10‑hour shifts between hours 4–6; 12‑hour shifts include two breaks (25 min and 20 min) between hours 3–5 and 7–9. Only approved national shift codes may be used."
+  },
+  {
+    "filename": "Rest_Break_SOP1.docx",
+    "paragraph": 7,
+    "type": "text",
+    "content": "In the 15 minutes before a rest window opens, crews on station may request their break early. Dispatchers must not offer this. Crews cannot be allocated TIMED ADMISSION/ROUTINE CALLS within 1 hour of the window opening, or YELLOW calls within 30 minutes."
+  },
+  {
+    "filename": "Rest_Break_SOP1.docx",
+    "paragraph": 8,
+    "type": "text",
+    "content": "When a rest window is open, crews requesting a break at their present location should be booked off. Crews cannot be allocated TIMED ADMISSION/ROUTINE CALLS or YELLOW calls until the break is complete. If a crew reaches the midpoint of the window without a break, they are no longer allocated AMBER calls. PURPLE or RED IFTs may be assigned only when no closer resource is available."
+  },
+  {
+    "filename": "Rest_Break_SOP1.docx",
+    "paragraph": 9,
+    "type": "text",
+    "content": "After the window, crews remain protected from TIMED ADMISSION, ROUTINE, YELLOW, and AMBER incidents until the break is complete. ILT calls may still be assigned if the crew is the nearest appropriate resource."
+  },
+  {
+    "filename": "Rest_Break_SOP1.docx",
+    "paragraph": 10,
+    "type": "text",
+    "content": "A Special Break may be requested if a crew has not been rested by the end of the first window, or if more than 6 hours have passed since their last break and time remains owed. Once Special Break protection applies, crews are only assigned PURPLE incidents or major incidents.",
+    "image": "images/TestImage.png"
+  },
+  {
+    "filename": "Rest_Break_SOP1.docx",
+    "paragraph": 11,
+    "type": "text",
+    "content": "Crews may only be disturbed from a rest break for clinically triaged ILT or major incidents. Dispatchers must try to divert other resources, but if no alternative within 10 minutes exists, the resting crew may be disturbed. After disturbance, they are only sent to PURPLE or major incidents until owed break time is recovered."
   }
 ]
