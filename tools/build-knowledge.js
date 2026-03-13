@@ -66,7 +66,7 @@ async function extractDOCX(file) {
 
 }
 
-/* ---------- PDF EXTRACTION ---------- */
+
 
 async function extractPDF(file) {
 
