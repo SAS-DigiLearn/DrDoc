@@ -105,11 +105,9 @@ function appendMessage(text, sender) {
 function scoreResult(text, keywords) {
   let score = 0;
   const lower = text.toLowerCase();
-
   keywords.forEach(k => {
     if (lower.includes(k)) score += 5;
   });
-
   return score;
 }
 
@@ -121,55 +119,69 @@ function highlight(text, keywords) {
   return text;
 }
 
+function stripHTML(html) {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return div.textContent || "";
+}
+
 async function handleUserQuestion() {
   const input = document.getElementById('userInput');
   const query = input.value.trim();
   if (!query) return;
 
-  appendMessage(query, 'user');
+  appendMessage(query, 'user'); // show user's question
   input.value = '';
 
   const keywords = query.toLowerCase().split(/\s+/);
 
   const scored = knowledge.map(p => ({
     ...p,
-    score: scoreResult(p.content, keywords)
+    score: scoreResult(
+      p.type === 'table' ? stripHTML(p.content) : p.content,
+      keywords
+    )
   }))
   .filter(r => r.score > 0)
-  .sort((a,b)=>b.score-a.score)
-  .slice(0,2);
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 2);
 
-  if (scored.length > 0) {
-    scored.forEach((result, index) => {
+  if (scored.length === 0) {
+    appendMessage("Sorry, I couldn't find anything related.", 'bot');
+    return;
+  }
 
+  scored.forEach((result, index) => {
+
+    let displayContent = "";
+
+    if (result.type === 'table') {
+      displayContent = result.content;
+    } else {
       const sentences = result.content.match(/[^.!?]+[.!?]+/g) || [result.content];
       const bestSentence = sentences.find(s =>
         keywords.some(k => s.toLowerCase().includes(k))
       ) || sentences[0];
 
-      const highlighted = highlight(bestSentence, keywords);
+      displayContent = highlight(bestSentence, keywords);
+    }
 
-      appendMessage(`<div>
-        let imageHTML = "";
+    let imageHTML = "";
+    if (result.image) {
+      imageHTML = `<img src="${result.image}" class="tip-image">`;
+    }
 
-if (result.image) {
-  imageHTML = `<img src="${result.image}" class="tip-image">`;
-}
+    appendMessage(`
+      <div>
+        <p><b>Result ${index + 1}:</b></p>
+        ${displayContent}
+        ${imageHTML}
+        <small><b>${result.filename}</b> - paragraph ${result.paragraph}</small>
+        ${index < scored.length - 1 ? '<hr>' : ''}
+      </div>
+    `, 'bot');
 
-appendMessage(`
-<div>
-<p><b>Result ${index + 1}:</b> ${highlighted}</p>
-${imageHTML}
-<small><b>${result.filename}</b> - paragraph ${result.paragraph}</small>
-${index < 1 ? '<hr>' : ''}
-</div>
-`, 'bot');
-
-    });
-
-  } else {
-    appendMessage("Sorry, I couldn't find anything related.", 'bot');
-  }
+  });
 }
 
 document.getElementById('userInput').addEventListener("keypress", function(event) {
