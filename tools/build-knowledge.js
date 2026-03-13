@@ -1,7 +1,6 @@
 import fs from "fs";
 import mammoth from "mammoth";
 import pdf from "pdf-parse";
-import cheerio from "cheerio";
 
 const dataDir = "./docs";
 const output = "./data/knowledge.json";
@@ -26,43 +25,49 @@ async function extractDOCX(file) {
 
   const result = await mammoth.convertToHtml({ path: file });
 
-  const $ = cheerio.load(result.value);
+  const html = result.value;
 
-  let parsed = [];
-  let index = 1;
+  let items = [];
 
-  $("p, table").each((i, el) => {
+  // Extract tables
+  const tableRegex = /<table[\s\S]*?<\/table>/gi;
+  let tables = html.match(tableRegex) || [];
 
-    if (el.tagName === "p") {
+  // Remove tables from HTML so we can process paragraphs separately
+  let htmlWithoutTables = html.replace(tableRegex, "");
 
-      const text = $(el).text().trim();
-      if (!text) return;
+  // Extract paragraphs
+  const paraRegex = /<p>(.*?)<\/p>/gi;
+  let match;
 
-      const image = extractImage(text);
-      const cleanText = removeImageMarker(text);
+  while ((match = paraRegex.exec(htmlWithoutTables)) !== null) {
 
-      parsed.push({
-        paragraph: index++,
-        type: "text",
-        content: cleanText,
-        image: image
-      });
+    const text = match[1]
+      .replace(/<\/?[^>]+>/g, "")
+      .trim();
 
-    }
+    if (!text) continue;
 
-    if (el.tagName === "table") {
+    const image = extractImage(text);
+    const cleanText = removeImageMarker(text);
 
-      parsed.push({
-        paragraph: index++,
-        type: "table",
-        content: $.html(el)
-      });
+    items.push({
+      type: "text",
+      content: cleanText,
+      image: image
+    });
 
-    }
+  }
 
+  // Add tables as separate items
+  tables.forEach(t => {
+    items.push({
+      type: "table",
+      content: t
+    });
   });
 
-  return parsed;
+  return items;
 
 }
 
@@ -75,8 +80,7 @@ async function extractPDF(file) {
 
   return data.text
     .split(/\n{2,}/)
-    .map((p, i) => ({
-      paragraph: i + 1,
+    .map(p => ({
       type: "text",
       content: p.trim()
     }))
@@ -103,11 +107,11 @@ async function run() {
       items = await extractPDF(path);
     }
 
-    items.forEach(item => {
+    items.forEach((item, i) => {
 
       const entry = {
         filename: file,
-        paragraph: item.paragraph,
+        paragraph: i + 1,
         type: item.type,
         content: item.content
       };
