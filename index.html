@@ -150,10 +150,20 @@ async function handleUserQuestion() {
       const highlighted = highlight(bestSentence, keywords);
 
       appendMessage(`<div>
-        <p><b>Result ${index + 1}:</b> ${highlighted}</p>
-        <small><b>${result.filename}</b> - paragraph ${result.paragraph}</small>
-        ${index < 1 ? '<hr>' : ''}
-      </div>`, 'bot');
+        let imageHTML = "";
+
+if (result.image) {
+  imageHTML = `<img src="${result.image}" class="tip-image">`;
+}
+
+appendMessage(`
+<div>
+<p><b>Result ${index + 1}:</b> ${highlighted}</p>
+${imageHTML}
+<small><b>${result.filename}</b> - paragraph ${result.paragraph}</small>
+${index < 1 ? '<hr>' : ''}
+</div>
+`, 'bot');
 
     });
 
