@@ -66,34 +66,30 @@ async function extractDOCX(file) {
   /* ---------- REMOVE TABLES FROM HTML ---------- */
   const htmlWithoutTables = html.replace(tableRegex, "");
 
-  /* ---------- EXTRACT PARAGRAPHS & HEADINGS ---------- */
-  const paraRegex = /<(p|h[1-3])[^>]*>(.*?)<\/\1>/gi;
+  /* ---------- EXTRACT PARAGRAPHS ---------- */
+  // Use <p> tags as paragraphs; look for bold text as pseudo-headings
+  const paraRegex = /<p[^>]*>(.*?)<\/p>/gi;
   let match;
-  let lastHeading = "";
 
   while ((match = paraRegex.exec(htmlWithoutTables)) !== null) {
-    const tag = match[1];        // 'p', 'h1', etc
-    let text = match[2]
-      .replace(/<\/?[^>]+>/g, "")
-      .trim();
-
+    let text = match[1].trim();
     if (!text) continue;
 
-    // Preserve headings for next paragraph
-    if (tag.startsWith("h")) {
-      lastHeading = text;
-      continue; // heading itself is not a paragraph
-    }
+    // Remove inner HTML tags
+    text = text.replace(/<\/?[^>]+>/g, "");
 
-    // Combine heading + paragraph text
-    const combinedText = lastHeading ? `${lastHeading} - ${text}` : text;
-    lastHeading = ""; // reset after using
+    // Check for a heading: first bold text
+    const headingMatch = match[1].match(/<b>(.*?)<\/b>/i);
+    const heading = headingMatch ? headingMatch[1].trim() : "";
+
+    // Prepend heading if exists
+    const combinedText = heading ? `${heading} - ${text}` : text;
 
     const image = extractImage(combinedText);
     const cleanText = removeImageMarker(combinedText);
 
-    // Only chunk if paragraph is very long
-    const chunked = cleanText.length > 400 ? chunkText(cleanText) : [cleanText];
+    // Keep full paragraph unless extremely long
+    const chunked = cleanText.length > 1000 ? chunkText(cleanText) : [cleanText];
 
     chunked.forEach(c => {
       items.push({
@@ -107,7 +103,6 @@ async function extractDOCX(file) {
 
   return items;
 }
-
 /* ---------- PDF EXTRACTION ---------- */
 
 async function extractPDF(file) {
