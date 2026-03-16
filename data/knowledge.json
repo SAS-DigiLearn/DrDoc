@@ -44,7 +44,7 @@
     "filename": "Rest Break SOP.docx",
     "paragraph": 5,
     "type": "text",
-    "content": "Aim - To ensure appropriate and effective rest break management of all resources booked onto the C3 System for deployment and to improve rest break compliance, working to the principle that nobody should work more than 6 hours without a break.",
+    "content": "To ensure appropriate and effective rest break management of all resources booked onto the C3 System for deployment and to improve rest break compliance, working to the principle that nobody should work more than 6 hours without a break.",
     "keywords": [
       "ensure",
       "appropriate",
@@ -77,11 +77,8 @@
     "filename": "Rest Break SOP.docx",
     "paragraph": 6,
     "type": "text",
-    "content": "Definition of a Rest Break - The definition of a rest break is a short period of time not less than 20 mins, undisturbed, which should not be taken at the commencement or end of the working day, where an employee is able to stop and relax, use facilities, or simply take time to clear their heads, therefore pause, and recharge.",
+    "content": "The definition of a rest break is a short period of time not less than 20 mins, undisturbed, which should not be taken at the commencement or end of the working day, where an employee is able to stop and relax, use facilities, or simply take time to clear their heads, therefore pause, and recharge.",
     "keywords": [
-      "definition",
-      "rest",
-      "break",
       "definition",
       "rest",
       "break",
@@ -118,9 +115,8 @@
     "filename": "Rest Break SOP.docx",
     "paragraph": 7,
     "type": "text",
-    "content": "Policy - The Service gives an absolute commitment to provide rest breaks to all staff to whom this agreement applies. The SOP will apply to all Scottish Ambulance Service colleagues booked onto the C3 system for deployment.",
+    "content": "The Service gives an absolute commitment to provide rest breaks to all staff to whom this agreement applies. The SOP will apply to all Scottish Ambulance Service colleagues booked onto the C3 system for deployment.",
     "keywords": [
-      "policy",
       "service",
       "gives",
       "absolute",
@@ -208,11 +204,8 @@
     "filename": "Rest Break SOP.docx",
     "paragraph": 10,
     "type": "text",
-    "content": "Rest Break Windows - Windows: 3rd to 5th hour and 7th to 9th hour",
+    "content": "Windows: 3rd to 5th hour and 7th to 9th hour",
     "keywords": [
-      "rest",
-      "break",
-      "windows",
       "windows",
       "hour",
       "hour"
@@ -260,9 +253,8 @@
     "filename": "Rest Break SOP.docx",
     "paragraph": 12,
     "type": "text",
-    "content": "Procedure - Before and throughout rest period windows, operational crews will be protected from some incidents to prioritise a rest period as early as possible.",
+    "content": "Before and throughout rest period windows, operational crews will be protected from some incidents to prioritise a rest period as early as possible. Dispatchers within the Ambulance Control Centres will make every effort to allocate rest breaks at the earliest opportunity when rest period windows open in line with rest break windows. Crews will be returned to station as quickly as possible and should take the most direct route.",
     "keywords": [
-      "procedure",
       "before",
       "throughout",
       "rest",
@@ -277,15 +269,7 @@
       "rest",
       "period",
       "early",
-      "possible"
-    ]
-  },
-  {
-    "filename": "Rest Break SOP.docx",
-    "paragraph": 13,
-    "type": "text",
-    "content": "Dispatchers within the Ambulance Control Centres will make every effort to allocate rest breaks at the earliest opportunity when rest period windows open in line with rest break windows.",
-    "keywords": [
+      "possible",
       "dispatchers",
       "within",
       "ambulance",
@@ -306,15 +290,7 @@
       "line",
       "rest",
       "break",
-      "windows"
-    ]
-  },
-  {
-    "filename": "Rest Break SOP.docx",
-    "paragraph": 14,
-    "type": "text",
-    "content": "Crews will be returned to station as quickly as possible and should take the most direct route.",
-    "keywords": [
+      "windows",
       "crews",
       "returned",
       "station",
@@ -329,7 +305,7 @@
   },
   {
     "filename": "Rest Break SOP.docx",
-    "paragraph": 15,
+    "paragraph": 13,
     "type": "text",
     "content": "To ensure an appropriate response is maintained to the most time critical patients and major incidents, all staff as listed above will be required to remain available throughout their shift (except in the case of Special Break protection) for the following:",
     "keywords": [
@@ -362,7 +338,7 @@
   },
   {
     "filename": "Rest Break SOP.docx",
-    "paragraph": 16,
+    "paragraph": 14,
     "type": "text",
     "content": "Note – clinically triaged incidents are incidents coded using MPDS by call handlers, or outcome codes by the Integrated Clinical Hub or Specialist Service Desk.",
     "keywords": [
@@ -387,7 +363,7 @@
   },
   {
     "filename": "Rest Break SOP.docx",
-    "paragraph": 17,
+    "paragraph": 15,
     "type": "text",
     "content": "This is described in the procedures below:",
     "keywords": [
@@ -398,15 +374,10 @@
   },
   {
     "filename": "Rest Break SOP.docx",
-    "paragraph": 18,
+    "paragraph": 16,
     "type": "text",
-    "content": "Protection After a Rest Break Window - NOTE: An interfacility transfer is also known as a hospital-to-hospital transfer.",
+    "content": "NOTE: An interfacility transfer is also known as a hospital-to-hospital transfer.",
     "keywords": [
-      "protection",
-      "after",
-      "rest",
-      "break",
-      "window",
       "note",
       "interfacility",
       "transfer",
@@ -418,13 +389,10 @@
   },
   {
     "filename": "Rest Break SOP.docx",
-    "paragraph": 19,
+    "paragraph": 17,
     "type": "text",
-    "content": "Special Break Protection - A Special Break is irrefusable in two scenarios within a shift:",
+    "content": "A Special Break is irrefusable in two scenarios within a shift:",
     "keywords": [
-      "special",
-      "break",
-      "protection",
       "special",
       "break",
       "irrefusable",
@@ -435,7 +403,7 @@
   },
   {
     "filename": "Rest Break SOP.docx",
-    "paragraph": 20,
+    "paragraph": 18,
     "type": "text",
     "content": "Exception: If taking the full balance would leave the crew with more than 6 hours left to work, they only take the first break balance now, and the second break will happen in the next window.",
     "keywords": [
@@ -466,7 +434,7 @@
   },
   {
     "filename": "Rest Break SOP.docx",
-    "paragraph": 21,
+    "paragraph": 19,
     "type": "text",
     "content": "Once special break protection is applied the crew will only be sent to purple coded incidents or major incidents until their owed break time is complete.",
     "keywords": [
@@ -493,7 +461,7 @@
   },
   {
     "filename": "Rest Break SOP.docx",
-    "paragraph": 22,
+    "paragraph": 20,
     "type": "text",
     "content": "A graphic of these levels of protection can be found below:",
     "keywords": [
@@ -508,47 +476,10 @@
   },
   {
     "filename": "Rest Break SOP.docx",
-    "paragraph": 23,
+    "paragraph": 22,
     "type": "text",
-    "content": "Rest Break Disturbances - Exception: If taking the full balance would leave the crew with more than 6 hours left to work, they only take the first break balance now, and the second break will happen in the next window.",
+    "content": "Note: If there are two vehicles available on a station, one on a rest break and one in the final hour of their duty, then the crew on rest break should be allocated the call and the rest break SOP applied.",
     "keywords": [
-      "rest",
-      "break",
-      "disturbances",
-      "exception",
-      "taking",
-      "full",
-      "balance",
-      "would",
-      "leave",
-      "crew",
-      "more",
-      "than",
-      "hours",
-      "left",
-      "work",
-      "they",
-      "only",
-      "take",
-      "first",
-      "break",
-      "balance",
-      "second",
-      "break",
-      "happen",
-      "next",
-      "window"
-    ]
-  },
-  {
-    "filename": "Rest Break SOP.docx",
-    "paragraph": 24,
-    "type": "text",
-    "content": "Special Break Disturbances - Note: If there are two vehicles available on a station, one on a rest break and one in the final hour of their duty, then the crew on rest break should be allocated the call and the rest break SOP applied.",
-    "keywords": [
-      "special",
-      "break",
-      "disturbances",
       "note",
       "there",
       "vehicles",
