@@ -1,4 +1,4 @@
-name: Build Knowledge Base & Deploy Static Site
+name: Build Knowledge Base & Jekyll Site
 
 on:
   push:
@@ -8,20 +8,25 @@ on:
       - "docs/**"
       - "tools/build-knowledge.js"
       - "package.json"
-      - "index.html"
-      - "data/**"
-      - "images/**"
+      - "_config.yml"
 
 concurrency:
-  group: build-sopbot-${{ github.ref }}
+  group: build-knowledge-jekyll-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
+    # Force Actions to run on Node 24 to avoid Node 20 deprecation issues
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    permissions:
+      contents: write
+
     steps:
-      # 1️⃣ Checkout the repo
+      # 1️⃣ Checkout repository
       - name: Checkout repo
         uses: actions/checkout@v5
 
@@ -40,7 +45,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      # 4️⃣ Install dependencies
+      # 4️⃣ Install Node dependencies
       - name: Install dependencies
         run: npm install
 
@@ -57,11 +62,15 @@ jobs:
           git diff --cached --quiet || git commit -m "Update knowledge base"
           git push || echo "No changes to push"
 
-      # 7️⃣ Deploy static site to GitHub Pages
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v6
+      # 7️⃣ Build Jekyll site
+      - name: Build Jekyll site
+        uses: actions/jekyll-build-pages@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: ./      # publish the root (index.html + data + images)
-          keep_files: true
+          source_dir: './'
+          destination_dir: './_site'
+
+      # 8️⃣ Optional: deploy or upload
+      - name: Deploy / Upload
+        run: |
+          echo "Add your deploy steps here (e.g., GitHub Pages, S3, Netlify, etc.)"
