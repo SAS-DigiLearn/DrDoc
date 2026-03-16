@@ -85,45 +85,37 @@ function chunkText(text) {
 
 async function extractDOCX(file) {
 
- const result = await mammoth.convertToHtml(
-  { path: file },
-  {
-    convertImage: mammoth.images.imgElement(function(image) {
+  const result = await mammoth.convertToHtml(
+    { path: file },
+    {
+      convertImage: mammoth.images.imgElement(function(image) {
 
-      const filename = "img_" + Date.now() + "." + image.contentType.split("/")[1];
-      const filepath = "./images/" + filename;
+        const filename = "img_" + Date.now() + "." + image.contentType.split("/")[1];
+        const filepath = "./images/" + filename;
 
-      return image.read("base64").then(function(imageBuffer) {
+        return image.read("base64").then(function(imageBuffer) {
 
-        const buffer = Buffer.from(imageBuffer, "base64");
-        fs.writeFileSync(filepath, buffer);
+          const buffer = Buffer.from(imageBuffer, "base64");
+          fs.writeFileSync(filepath, buffer);
 
-        return {
-          src: "images/" + filename
-        };
+          return {
+            src: "images/" + filename
+          };
 
-      });
+        });
 
-    })
-  }
-);
+      })
+    }
+  );
 
-  /* ---------- PROCESS EMBEDDED WORD IMAGES ---------- */
-
-  const embeddedImages = extractEmbeddedImages(html);
-
-  let processedHTML = html;
-
-  embeddedImages.forEach(img=>{
-    processedHTML = processedHTML.replace(img.original,img.replacement);
-  });
+  const html = result.value;
 
   let items = [];
 
   /* ---------- EXTRACT TABLES ---------- */
 
   const tableRegex = /<table[\s\S]*?<\/table>/gi;
-  const tables = processedHTML.match(tableRegex) || [];
+  const tables = html.match(tableRegex) || [];
 
   tables.forEach(t => {
     const styledTable = t.replace("<table", "<table class='sop-table'");
@@ -135,7 +127,7 @@ async function extractDOCX(file) {
 
   /* ---------- REMOVE TABLES FROM HTML ---------- */
 
-  const htmlWithoutTables = processedHTML.replace(tableRegex, "");
+  const htmlWithoutTables = html.replace(tableRegex, "");
 
   /* ---------- EXTRACT [para] PARAGRAPHS ---------- */
 
@@ -159,10 +151,10 @@ async function extractDOCX(file) {
     chunked.forEach(c => {
 
       items.push({
-        type:"text",
-        content:c,
-        image:image,
-        keywords:extractKeywords(c.replace(/<[^>]+>/g,""))
+        type: "text",
+        content: c,
+        image: image,
+        keywords: extractKeywords(c.replace(/<[^>]+>/g,""))
       });
 
     });
@@ -172,7 +164,6 @@ async function extractDOCX(file) {
   return items;
 
 }
-
 /* ---------- PDF EXTRACTION ---------- */
 
 async function extractPDF(file) {
