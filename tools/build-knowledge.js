@@ -52,21 +52,50 @@ function chunkText(text) {
 
 async function extractDOCX(file) {
 
-  const result = await mammoth.extractRawText({ path: file });
-  const paragraphs = result.value.split(/\n{2,}/);
+  const result = await mammoth.convertToHtml({ path: file });
+  const html = result.value;
 
   let items = [];
 
-  paragraphs.forEach(p => {
+  /* ---------- EXTRACT TABLES ---------- */
 
-    if (!p.trim()) return;
+  const tableRegex = /<table[\s\S]*?<\/table>/gi;
+  const tables = html.match(tableRegex) || [];
 
-    const image = extractImage(p);
-    const cleanText = removeImageMarker(p);
+  tables.forEach(t => {
 
-    const chunks = chunkText(cleanText);
+    const styledTable = t.replace("<table", "<table class='sop-table'");
 
-    chunks.forEach(c => {
+    items.push({
+      type: "table",
+      content: styledTable
+    });
+
+  });
+
+  /* ---------- REMOVE TABLES FROM TEXT ---------- */
+
+  const htmlWithoutTables = html.replace(tableRegex, "");
+
+  /* ---------- EXTRACT PARAGRAPHS ---------- */
+
+  const paraRegex = /<p>(.*?)<\/p>/gi;
+  let match;
+
+  while ((match = paraRegex.exec(htmlWithoutTables)) !== null) {
+
+    const text = match[1]
+      .replace(/<\/?[^>]+>/g, "")
+      .trim();
+
+    if (!text) continue;
+
+    const image = extractImage(text);
+    const cleanText = removeImageMarker(text);
+
+    const chunked = chunkText(cleanText);
+
+    chunked.forEach(c => {
 
       items.push({
         type: "text",
@@ -76,18 +105,8 @@ async function extractDOCX(file) {
       });
 
     });
-tables.forEach(t => {
 
-  const styledTable = t
-    .replace("<table", "<table class='sop-table'");
-
-  items.push({
-    type: "table",
-    content: styledTable
-  });
-
-});
-  });
+  }
 
   return items;
 
@@ -106,9 +125,9 @@ async function extractPDF(file) {
 
   paragraphs.forEach(p => {
 
-    const chunks = chunkText(p);
+    const chunked = chunkText(p);
 
-    chunks.forEach(c => {
+    chunked.forEach(c => {
 
       items.push({
         type: "text",
