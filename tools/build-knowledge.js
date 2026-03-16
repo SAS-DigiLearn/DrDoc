@@ -46,6 +46,7 @@ function chunkText(text) {
 /* ---------- DOCX EXTRACTION (IMPROVED) ---------- */
 
 async function extractDOCX(file) {
+  // Convert DOCX to HTML (preserves tables and formatting)
   const result = await mammoth.convertToHtml({ path: file });
   const html = result.value;
 
@@ -66,26 +67,24 @@ async function extractDOCX(file) {
   /* ---------- REMOVE TABLES FROM HTML ---------- */
   const htmlWithoutTables = html.replace(tableRegex, "");
 
-  /* ---------- EXTRACT [para] PARAGRAPHS ---------- */
-  // Remove any HTML tags but preserve text
-  const plainText = htmlWithoutTables.replace(/<\/?[^>]+>/g, "");
-  
-  const paragraphs = plainText
-    .split(/\[para\]/i)   // split on [para]
-    .map(p => p.trim())
-    .filter(Boolean);
+  /* ---------- EXTRACT [para] PARAGRAPHS WITH FORMATTING ---------- */
+  // Split by [para] marker, but keep HTML tags inside
+  const paraRegex = /\[para\](.*?)(?=\[para\]|$)/gis;
+  let match;
+  while ((match = paraRegex.exec(htmlWithoutTables)) !== null) {
+    let paragraphHTML = match[1].trim();
+    if (!paragraphHTML) continue;
 
-  paragraphs.forEach(p => {
-    const image = extractImage(p);
-    const cleanText = removeImageMarker(p);
+    const image = extractImage(paragraphHTML);
+    const cleanHTML = removeImageMarker(paragraphHTML);
 
     items.push({
       type: "text",
-      content: cleanText,
+      content: cleanHTML,  // HTML formatting preserved
       image: image,
-      keywords: extractKeywords(cleanText)
+      keywords: extractKeywords(cleanHTML.replace(/<[^>]+>/g, "")) // keywords on text only
     });
-  });
+  }
 
   return items;
 }
