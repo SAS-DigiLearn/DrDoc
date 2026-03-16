@@ -12,62 +12,61 @@
 <style>
 
 body {
-font-family: Arial;
-background:#f8f9fa;
-padding:10px;
+  font-family: Arial;
+  background:#f8f9fa;
+  padding:10px;
 }
 
 #chatbox{
-background:white;
-max-width:800px;
-margin:auto;
-padding:15px;
-border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,0.1);
+  background:white;
+  max-width:800px;
+  margin:auto;
+  padding:15px;
+  border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
 .message{
-margin:10px 0;
-padding:10px;
-border-radius:8px;
-border:1px solid #dee2e6;
+  margin:10px 0;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #dee2e6;
 }
 
 .bot{
-background:#FCE8F2;
-margin-right:10%;
+  background:#FCE8F2;
+  margin-right:10%;
 }
 
 .user{
-background:#e9ecef;
-margin-left:10%;
-text-align:right;
+  background:#e9ecef;
+  margin-left:10%;
+  text-align:right;
 }
 
 button{
-padding:8px 15px;
-background:#b91e71;
-color:white;
-border:none;
-border-radius:5px;
-cursor:pointer;
+  padding:8px 15px;
+  background:#b91e71;
+  color:white;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
 }
 
 input{
-padding:10px;
-width:70%;
-border-radius:5px;
-border:1px solid #ccc;
+  padding:10px;
+  width:70%;
+  border-radius:5px;
+  border:1px solid #ccc;
 }
-
-
 
 .tip-image{
-max-width:100%;
-border-radius:8px;
-margin-top:6px;
+  max-width:100%;
+  border-radius:8px;
+  margin-top:6px;
 }
 
+/* Tables already styled */
 .sop-table {
   border-collapse: collapse;
   width: 100%;
@@ -87,6 +86,17 @@ margin-top:6px;
 .sop-table tr:nth-child(even) {
   background: #fafafa;
 }
+
+/* Add spacing and indentation for lists */
+.message ul, .message ol {
+  margin: 5px 0 5px 20px;
+  padding: 0;
+}
+
+.message li {
+  margin-bottom: 3px;
+}
+
 </style>
 </head>
 
@@ -113,121 +123,107 @@ let fuse;
 /* ---------- SYNONYM MAP ---------- */
 
 const synonyms={
-login:["log in","sign in","signin"],
-password:["passcode","credential"],
-reset:["change","update","recover"],
-account:["profile","user"]
+  login:["log in","sign in","signin"],
+  password:["passcode","credential"],
+  reset:["change","update","recover"],
+  account:["profile","user"]
 };
 
 /* ---------- EXPAND QUERY ---------- */
 
 function expandQuery(query){
+  let words=query.toLowerCase().split(/\s+/);
+  let expanded=[...words];
 
-let words=query.toLowerCase().split(/\s+/);
-let expanded=[...words];
+  words.forEach(w=>{
+    if(synonyms[w]){
+      expanded.push(...synonyms[w]);
+    }
+  });
 
-words.forEach(w=>{
-if(synonyms[w]){
-expanded.push(...synonyms[w]);
-}
-});
-
-return expanded.join(" ");
+  return expanded.join(" ");
 }
 
 /* ---------- LOAD KNOWLEDGE ---------- */
 
 async function loadKnowledge(){
+  const res=await fetch("./data/knowledge.json");
+  knowledge=await res.json();
 
-const res=await fetch("./data/knowledge.json");
-knowledge=await res.json();
-
-fuse=new Fuse(knowledge,{
-keys:["content","keywords"],
-threshold:0.35,
-includeScore:true,
-ignoreLocation:true
-});
-
+  fuse=new Fuse(knowledge,{
+    keys:["content","keywords"],
+    threshold:0.35,
+    includeScore:true,
+    ignoreLocation:true
+  });
 }
 
 loadKnowledge();
 
 /* ---------- UI HELPERS ---------- */
 
-function appendMessage(text,sender){
+/* Updated appendMessage to preserve safe HTML formatting including lists and tables */
+function appendMessage(htmlContent,sender){
+  const msg=document.createElement("div");
+  msg.className="message "+sender;
 
-const msg=document.createElement("div");
-msg.className="message "+sender;
+  const allowedTags = ['b','i','em','strong','ul','ol','li','p','br','table','thead','tbody','tr','th','td'];
+  msg.innerHTML=DOMPurify.sanitize(htmlContent,{ALLOWED_TAGS:allowedTags});
 
-msg.innerHTML=DOMPurify.sanitize(text);
-
-document.getElementById("messages").appendChild(msg);
-
+  document.getElementById("messages").appendChild(msg);
+  messages.scrollTop = messages.scrollHeight;
 }
-
-
 
 /* ---------- SEARCH ---------- */
 
 function handleUserQuestion(){
+  const input=document.getElementById("userInput");
+  const query=input.value.trim();
 
-const input=document.getElementById("userInput");
-const query=input.value.trim();
+  if(!query) return;
 
-if(!query) return;
+  appendMessage(query,"user");
+  input.value="";
 
-appendMessage(query,"user");
+  const expanded=expandQuery(query);
 
-input.value="";
+  const results=fuse.search(expanded)
+    .slice(0,3)
+    .map(r=>r.item);
 
-const expanded=expandQuery(query);
+  if(results.length===0){
+    appendMessage("Sorry, I couldn't find anything related.","bot");
+    return;
+  }
 
-const results=fuse.search(expanded)
-.slice(0,3)
-.map(r=>r.item);
+  results.forEach((result,i)=>{
+    let content = result.content;
 
-if(results.length===0){
+    let imageHTML = "";
+    if (result.image) {
+      imageHTML = `<img src="${result.image}" class="tip-image">`;
+    }
 
-appendMessage("Sorry, I couldn't find anything related.","bot");
-return;
-
-}
-
-results.forEach((result,i)=>{
-
-let content = result.content;
-
-let imageHTML = "";
-
-if (result.image) {
-  imageHTML = `<img src="${result.image}" class="tip-image">`;
-}
-
-appendMessage(`
-<div>
-<p><b>Result ${i+1}</b></p>
-${content}
-${imageHTML}
-<br>
-<small><b>${result.filename}</b></small>
-</div>
-`,"bot");
-
-});
-
+    appendMessage(`
+      <div>
+        <p><b>Result ${i+1}</b></p>
+        ${content}
+        ${imageHTML}
+        <br>
+        <small><b>${result.filename}</b></small>
+      </div>
+    `,"bot");
+  });
 }
 
 /* ---------- ENTER KEY ---------- */
 
 document.getElementById("userInput")
 .addEventListener("keypress",function(e){
-
-if(e.key==="Enter"){
-e.preventDefault();
-handleUserQuestion();
-}
-
+  if(e.key==="Enter"){
+    e.preventDefault();
+    handleUserQuestion();
+  }
 });
 
 </script>
