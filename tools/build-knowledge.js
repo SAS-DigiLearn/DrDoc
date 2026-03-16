@@ -76,7 +76,17 @@ async function extractDOCX(file) {
       });
 
     });
+tables.forEach(t => {
 
+  const styledTable = t
+    .replace("<table", "<table class='sop-table'");
+
+  items.push({
+    type: "table",
+    content: styledTable
+  });
+
+});
   });
 
   return items;
