@@ -78,7 +78,7 @@ async function extractDOCX(file) {
     const cleanHTML = removeImageMarker(paragraphHTML);
 
     // Only chunk very long paragraphs; otherwise keep as one block
-    const chunked = cleanHTML.length > 1000 ? chunkText(cleanHTML).map(s => s) : [cleanHTML];
+    const chunked = cleanHTML.length > 2000 ? chunkText(cleanHTML).map(s => s) : [cleanHTML];
 
     chunked.forEach(c => {
       items.push({
