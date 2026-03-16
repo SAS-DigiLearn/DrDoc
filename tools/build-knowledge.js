@@ -11,7 +11,6 @@ let chunks = [];
 
 function extractImage(text) {
 
- 
   const plain = text.replace(/<[^>]+>/g,"");
 
   const match = plain.match(/\[image:(.*?)\]/i);
@@ -24,6 +23,38 @@ function extractImage(text) {
 
 function removeImageMarker(text) {
   return text.replace(/\[image:.*?\]/gi, "").trim();
+}
+
+/* ---------- EMBEDDED WORD IMAGE EXTRACTION ---------- */
+
+function extractEmbeddedImages(html){
+
+  const imgRegex = /<img[^>]+src="data:image\/([^;]+);base64,([^"]+)"/gi;
+
+  let images=[];
+  let match;
+
+  while((match=imgRegex.exec(html))!==null){
+
+    const ext = match[1];
+    const base64 = match[2];
+
+    const filename = `img_${Math.random().toString(36).substring(2,10)}.${ext}`;
+    const path = `images/${filename}`;
+
+    const buffer = Buffer.from(base64,"base64");
+
+    fs.writeFileSync(`./${path}`,buffer);
+
+    images.push({
+      original:match[0],
+      replacement:`<img src="${path}" class="tip-image">`
+    });
+
+  }
+
+  return images;
+
 }
 
 /* ---------- KEYWORD EXTRACTION ---------- */
@@ -47,21 +78,32 @@ function chunkText(text) {
   const sentences = text.split(/(?<=[.!?])\s+/);
   return sentences
     .map(s => s.trim())
-    .filter(s => s.length > 40); // keep sentences longer than 40 chars
+    .filter(s => s.length > 40);
 }
 
 /* ---------- DOCX EXTRACTION ---------- */
 
 async function extractDOCX(file) {
-  // Convert DOCX to HTML to preserve tables and formatting
+
   const result = await mammoth.convertToHtml({ path: file });
   const html = result.value;
+
+  /* ---------- PROCESS EMBEDDED WORD IMAGES ---------- */
+
+  const embeddedImages = extractEmbeddedImages(html);
+
+  let processedHTML = html;
+
+  embeddedImages.forEach(img=>{
+    processedHTML = processedHTML.replace(img.original,img.replacement);
+  });
 
   let items = [];
 
   /* ---------- EXTRACT TABLES ---------- */
+
   const tableRegex = /<table[\s\S]*?<\/table>/gi;
-  const tables = html.match(tableRegex) || [];
+  const tables = processedHTML.match(tableRegex) || [];
 
   tables.forEach(t => {
     const styledTable = t.replace("<table", "<table class='sop-table'");
@@ -72,65 +114,87 @@ async function extractDOCX(file) {
   });
 
   /* ---------- REMOVE TABLES FROM HTML ---------- */
-  const htmlWithoutTables = html.replace(tableRegex, "");
 
-  /* ---------- EXTRACT [para] PARAGRAPHS (PRESERVE FORMATTING) ---------- */
+  const htmlWithoutTables = processedHTML.replace(tableRegex, "");
+
+  /* ---------- EXTRACT [para] PARAGRAPHS ---------- */
+
   const paraRegex = /\[para\](.*?)(?=\[para\]|$)/gis;
+
   let match;
+
   while ((match = paraRegex.exec(htmlWithoutTables)) !== null) {
+
     let paragraphHTML = match[1].trim();
+
     if (!paragraphHTML) continue;
 
     const image = extractImage(paragraphHTML);
     const cleanHTML = removeImageMarker(paragraphHTML);
 
-    // Only chunk very long paragraphs; otherwise keep as one block
-    const chunked = cleanHTML.length > 2000 ? chunkText(cleanHTML).map(s => s) : [cleanHTML];
+    const chunked = cleanHTML.length > 2000
+      ? chunkText(cleanHTML)
+      : [cleanHTML];
 
     chunked.forEach(c => {
+
       items.push({
-        type: "text",
-        content: c,
-        image: image,
-        keywords: extractKeywords(c.replace(/<[^>]+>/g, "")) // keywords on text only
+        type:"text",
+        content:c,
+        image:image,
+        keywords:extractKeywords(c.replace(/<[^>]+>/g,""))
       });
+
     });
+
   }
 
   return items;
+
 }
 
 /* ---------- PDF EXTRACTION ---------- */
 
 async function extractPDF(file) {
+
   const dataBuffer = fs.readFileSync(file);
   const data = await pdf(dataBuffer);
 
   const paragraphs = data.text.split(/\n{2,}/);
+
   let items = [];
 
   paragraphs.forEach(p => {
+
     const chunked = p.length > 1000 ? chunkText(p) : [p.trim()];
+
     chunked.forEach(c => {
+
       if (!c) return;
+
       items.push({
-        type: "text",
-        content: c,
-        keywords: extractKeywords(c)
+        type:"text",
+        content:c,
+        keywords:extractKeywords(c)
       });
+
     });
+
   });
 
   return items;
+
 }
 
 /* ---------- MAIN BUILD ---------- */
 
 async function run() {
+
   const files = fs.readdirSync(dataDir);
   const seen = new Set();
 
   for (const file of files) {
+
     const path = `${dataDir}/${file}`;
     let items = [];
 
@@ -142,25 +206,33 @@ async function run() {
       items = await extractPDF(path);
     }
 
-    items.forEach((item, i) => {
+    items.forEach((item,i)=>{
+
       const hash = item.content.toLowerCase();
-      if (seen.has(hash)) return;
+
+      if(seen.has(hash)) return;
       seen.add(hash);
 
       const entry = {
-        filename: file,
-        paragraph: i + 1,
-        type: item.type,
-        content: item.content,
-        keywords: item.keywords
+        filename:file,
+        paragraph:i+1,
+        type:item.type,
+        content:item.content,
+        keywords:item.keywords
       };
-      if (item.image) entry.image = item.image;
+
+      if(item.image) entry.image=item.image;
+
       chunks.push(entry);
+
     });
+
   }
 
-  fs.writeFileSync(output, JSON.stringify(chunks, null, 2));
-  console.log("Knowledge base built:", chunks.length);
+  fs.writeFileSync(output,JSON.stringify(chunks,null,2));
+
+  console.log("Knowledge base built:",chunks.length);
+
 }
 
 run();
