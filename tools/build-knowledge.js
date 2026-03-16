@@ -46,60 +46,25 @@ function chunkText(text) {
 /* ---------- DOCX EXTRACTION (IMPROVED) ---------- */
 
 async function extractDOCX(file) {
-  const result = await mammoth.convertToHtml({ path: file });
-  const html = result.value;
+  const result = await mammoth.extractRawText({ path: file }); 
+  const text = result.value; // raw text from DOCX
 
   let items = [];
 
-  /* ---------- EXTRACT TABLES ---------- */
-  const tableRegex = /<table[\s\S]*?<\/table>/gi;
-  const tables = html.match(tableRegex) || [];
+  // Split paragraphs on [para] marker
+  const paragraphs = text.split(/\[para\]/i).map(p => p.trim()).filter(Boolean);
 
-  tables.forEach(t => {
-    const styledTable = t.replace("<table", "<table class='sop-table'");
+  paragraphs.forEach(p => {
+    const image = extractImage(p);
+    const cleanText = removeImageMarker(p);
+
     items.push({
-      type: "table",
-      content: styledTable
+      type: "text",
+      content: cleanText,
+      image: image,
+      keywords: extractKeywords(cleanText)
     });
   });
-
-  /* ---------- REMOVE TABLES FROM HTML ---------- */
-  const htmlWithoutTables = html.replace(tableRegex, "");
-
-  /* ---------- EXTRACT PARAGRAPHS ---------- */
-  // Use <p> tags as paragraphs; look for bold text as pseudo-headings
-  const paraRegex = /<p[^>]*>(.*?)<\/p>/gi;
-  let match;
-
-  while ((match = paraRegex.exec(htmlWithoutTables)) !== null) {
-    let text = match[1].trim();
-    if (!text) continue;
-
-    // Remove inner HTML tags
-    text = text.replace(/<\/?[^>]+>/g, "");
-
-    // Check for a heading: first bold text
-    const headingMatch = match[1].match(/<b>(.*?)<\/b>/i);
-    const heading = headingMatch ? headingMatch[1].trim() : "";
-
-    // Prepend heading if exists
-    const combinedText = heading ? `${heading} - ${text}` : text;
-
-    const image = extractImage(combinedText);
-    const cleanText = removeImageMarker(combinedText);
-
-    // Keep full paragraph unless extremely long
-    const chunked = cleanText.length > 1000 ? chunkText(cleanText) : [cleanText];
-
-    chunked.forEach(c => {
-      items.push({
-        type: "text",
-        content: c,
-        image: image,
-        keywords: extractKeywords(c)
-      });
-    });
-  }
 
   return items;
 }
