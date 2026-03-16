@@ -46,13 +46,34 @@ function chunkText(text) {
 /* ---------- DOCX EXTRACTION (IMPROVED) ---------- */
 
 async function extractDOCX(file) {
-  const result = await mammoth.extractRawText({ path: file }); 
-  const text = result.value; // raw text from DOCX
+  const result = await mammoth.convertToHtml({ path: file });
+  const html = result.value;
 
   let items = [];
 
-  // Split paragraphs on [para] marker
-  const paragraphs = text.split(/\[para\]/i).map(p => p.trim()).filter(Boolean);
+  /* ---------- EXTRACT TABLES ---------- */
+  const tableRegex = /<table[\s\S]*?<\/table>/gi;
+  const tables = html.match(tableRegex) || [];
+
+  tables.forEach(t => {
+    const styledTable = t.replace("<table", "<table class='sop-table'");
+    items.push({
+      type: "table",
+      content: styledTable
+    });
+  });
+
+  /* ---------- REMOVE TABLES FROM HTML ---------- */
+  const htmlWithoutTables = html.replace(tableRegex, "");
+
+  /* ---------- EXTRACT [para] PARAGRAPHS ---------- */
+  // Remove any HTML tags but preserve text
+  const plainText = htmlWithoutTables.replace(/<\/?[^>]+>/g, "");
+  
+  const paragraphs = plainText
+    .split(/\[para\]/i)   // split on [para]
+    .map(p => p.trim())
+    .filter(Boolean);
 
   paragraphs.forEach(p => {
     const image = extractImage(p);
