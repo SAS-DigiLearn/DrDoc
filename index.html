@@ -60,9 +60,7 @@ border-radius:5px;
 border:1px solid #ccc;
 }
 
-.highlight{
-font-weight:bold;
-}
+
 
 .tip-image{
 max-width:100%;
@@ -170,18 +168,8 @@ document.getElementById("messages").appendChild(msg);
 
 /* ---------- HIGHLIGHT ---------- */
 
-function highlight(text,query){
-
-query.split(/\s+/).forEach(word=>{
-
-const regex=new RegExp(`(${word})`,"gi");
-
-text=text.replace(regex,"<span class='highlight'>$1</span>");
-
-});
-
-return text;
-
+ffunction highlight(text, query) {
+  return text;
 }
 
 /* ---------- SEARCH ---------- */
@@ -212,12 +200,12 @@ return;
 
 results.forEach((result,i)=>{
 
-let content=highlight(result.content,query);
+let content = result.content;
 
-let imageHTML="";
+let imageHTML = "";
 
-if(result.image){
-imageHTML=`<img src="${result.image}" class="tip-image">`;
+if (result.image) {
+  imageHTML = `<img src="${result.image}" class="tip-image">`;
 }
 
 appendMessage(`
