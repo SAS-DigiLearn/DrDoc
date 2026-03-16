@@ -5,7 +5,7 @@ import pdf from "pdf-parse";
 const dataDir = "./docs";
 const output = "./data/knowledge.json";
 
-let paragraphs = [];
+let chunks = [];
 
 /* ---------- IMAGE MARKER SUPPORT ---------- */
 
@@ -19,52 +19,64 @@ function removeImageMarker(text) {
   return text.replace(/\[image:.*?\]/i, "").trim();
 }
 
+/* ---------- KEYWORD EXTRACTION ---------- */
+
+function extractKeywords(text) {
+
+  const stopwords = new Set([
+    "the","and","for","are","with","that","this","from","your",
+    "have","will","into","you","can","not","use","how","when"
+  ]);
+
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s]/g,"")
+    .split(/\s+/)
+    .filter(w => w.length > 3 && !stopwords.has(w));
+
+}
+
+/* ---------- SENTENCE CHUNKING ---------- */
+
+function chunkText(text) {
+
+  const sentences = text.split(/(?<=[.!?])\s+/);
+
+  return sentences
+    .map(s => s.trim())
+    .filter(s => s.length > 40);
+
+}
+
 /* ---------- DOCX EXTRACTION ---------- */
 
 async function extractDOCX(file) {
 
-  const result = await mammoth.convertToHtml({ path: file });
-
-  const html = result.value;
+  const result = await mammoth.extractRawText({ path: file });
+  const paragraphs = result.value.split(/\n{2,}/);
 
   let items = [];
 
-  // Extract tables
-  const tableRegex = /<table[\s\S]*?<\/table>/gi;
-  let tables = html.match(tableRegex) || [];
+  paragraphs.forEach(p => {
 
-  // Remove tables from HTML so we can process paragraphs separately
-  let htmlWithoutTables = html.replace(tableRegex, "");
+    if (!p.trim()) return;
 
-  // Extract paragraphs
-  const paraRegex = /<p>(.*?)<\/p>/gi;
-  let match;
+    const image = extractImage(p);
+    const cleanText = removeImageMarker(p);
 
-  while ((match = paraRegex.exec(htmlWithoutTables)) !== null) {
+    const chunks = chunkText(cleanText);
 
-    const text = match[1]
-      .replace(/<\/?[^>]+>/g, "")
-      .trim();
+    chunks.forEach(c => {
 
-    if (!text) continue;
+      items.push({
+        type: "text",
+        content: c,
+        image: image,
+        keywords: extractKeywords(c)
+      });
 
-    const image = extractImage(text);
-    const cleanText = removeImageMarker(text);
-
-    items.push({
-      type: "text",
-      content: cleanText,
-      image: image
     });
 
-  }
-
-  // Add tables as separate items
-  tables.forEach(t => {
-    items.push({
-      type: "table",
-      content: t
-    });
   });
 
   return items;
@@ -78,13 +90,27 @@ async function extractPDF(file) {
   const dataBuffer = fs.readFileSync(file);
   const data = await pdf(dataBuffer);
 
-  return data.text
-    .split(/\n{2,}/)
-    .map(p => ({
-      type: "text",
-      content: p.trim()
-    }))
-    .filter(p => p.content.length > 0);
+  const paragraphs = data.text.split(/\n{2,}/);
+
+  let items = [];
+
+  paragraphs.forEach(p => {
+
+    const chunks = chunkText(p);
+
+    chunks.forEach(c => {
+
+      items.push({
+        type: "text",
+        content: c,
+        keywords: extractKeywords(c)
+      });
+
+    });
+
+  });
+
+  return items;
 
 }
 
@@ -93,6 +119,7 @@ async function extractPDF(file) {
 async function run() {
 
   const files = fs.readdirSync(dataDir);
+  const seen = new Set();
 
   for (const file of files) {
 
@@ -109,24 +136,30 @@ async function run() {
 
     items.forEach((item, i) => {
 
+      const hash = item.content.toLowerCase();
+
+      if (seen.has(hash)) return;
+      seen.add(hash);
+
       const entry = {
         filename: file,
         paragraph: i + 1,
         type: item.type,
-        content: item.content
+        content: item.content,
+        keywords: item.keywords
       };
 
       if (item.image) entry.image = item.image;
 
-      paragraphs.push(entry);
+      chunks.push(entry);
 
     });
 
   }
 
-  fs.writeFileSync(output, JSON.stringify(paragraphs, null, 2));
+  fs.writeFileSync(output, JSON.stringify(chunks, null, 2));
 
-  console.log("Knowledge base built:", paragraphs.length);
+  console.log("Knowledge base built:", chunks.length);
 
 }
 
