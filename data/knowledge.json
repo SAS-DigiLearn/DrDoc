@@ -483,7 +483,7 @@
     "filename": "Rest Break SOP.docx",
     "paragraph": 19,
     "type": "text",
-    "content": "<strong>Procedure </strong></p><p>Before and throughout rest period windows, operational crews will be protected from some incidents to prioritise a rest period as early as possible.",
+    "content": "<strong>Procedure </strong></p><p>Before and throughout rest period windows, operational crews will be protected from some incidents to prioritise a rest period as early as possible. Dispatchers within the Ambulance Control Centres will make every effort to allocate rest breaks at the earliest opportunity when rest period windows open in line with rest break windows. Crews will be returned to station as quickly as possible and should take the most direct route.</p><p>To ensure an appropriate response is maintained to the most time critical patients and major incidents, all staff as listed above will be required to remain available throughout their shift (except in the case of Special Break protection) for the following: </p><ul><li>All coded, clinically triaged ILT (Purple/Red) incidents</li><li>Major Incidents</li><li>SORT PDAs (SORT Teams only) </li></ul><p><em>Note – clinically triaged incidents are incidents coded using MPDS by call handlers, or outcome codes by the Integrated Clinical Hub or Specialist Service Desk. </em></p><p>This is described in the procedures below:</p><p>",
     "keywords": [
       "procedure",
       "before",
@@ -500,15 +500,7 @@
       "rest",
       "period",
       "early",
-      "possible"
-    ]
-  },
-  {
-    "filename": "Rest Break SOP.docx",
-    "paragraph": 20,
-    "type": "text",
-    "content": "Dispatchers within the Ambulance Control Centres will make every effort to allocate rest breaks at the earliest opportunity when rest period windows open in line with rest break windows.",
-    "keywords": [
+      "possible",
       "dispatchers",
       "within",
       "ambulance",
@@ -529,15 +521,7 @@
       "line",
       "rest",
       "break",
-      "windows"
-    ]
-  },
-  {
-    "filename": "Rest Break SOP.docx",
-    "paragraph": 21,
-    "type": "text",
-    "content": "Crews will be returned to station as quickly as possible and should take the most direct route.</p><p>To ensure an appropriate response is maintained to the most time critical patients and major incidents, all staff as listed above will be required to remain available throughout their shift (except in the case of Special Break protection) for the following: </p><ul><li>All coded, clinically triaged ILT (Purple/Red) incidents</li><li>Major Incidents</li><li>SORT PDAs (SORT Teams only) </li></ul><p><em>Note – clinically triaged incidents are incidents coded using MPDS by call handlers, or outcome codes by the Integrated Clinical Hub or Specialist Service Desk.",
-    "keywords": [
+      "windows",
       "crews",
       "returned",
       "station",
@@ -599,15 +583,7 @@
       "clinical",
       "specialist",
       "service",
-      "desk"
-    ]
-  },
-  {
-    "filename": "Rest Break SOP.docx",
-    "paragraph": 22,
-    "type": "text",
-    "content": "</em></p><p>This is described in the procedures below:</p><p>",
-    "keywords": [
+      "desk",
       "described",
       "procedures",
       "below"
@@ -615,7 +591,7 @@
   },
   {
     "filename": "Rest Break SOP.docx",
-    "paragraph": 23,
+    "paragraph": 20,
     "type": "text",
     "content": "<strong>Protection Prior to a Rest Break Window:</strong> </p><ul><li>Where a crew are on station, and in the 15 minutes prior to a rest period window opening the crew will have the opportunity to request their rest period early.<ul><li>Clarifier – the dispatcher should not offer this, it should be requested by the crew.</li></ul></li><li>A crew will not be allocated to <strong>a TIMED ADMISSION or ROUTINE CALL</strong> 1 hour prior to the rest break window opening. </li><li>A crew will not be allocated to a <strong>YELLOW</strong> call 30 minutes prior to a rest break window opening. <ul><li><em>Additional notes on protection prior to rest break window: it is important that we try and rest crews as early as possible to prevent later unavailability, Timed Admission and Yellow protection prior to a rest break increase the opportunity to rest a crew as early as possible within the window. </em></li></ul></li></ul><p>",
     "keywords": [
@@ -702,7 +678,7 @@
   },
   {
     "filename": "Rest Break SOP.docx",
-    "paragraph": 24,
+    "paragraph": 21,
     "type": "text",
     "content": "<strong>Protection During a Rest Break Window:</strong></p><ul><li>Where a staff member requests a break at the location they are currently in, e.g. at the nearest ambulance station or at hospital, this should be agreed, and the crew should be booked off. </li><li>A crew will not be allocated to a <strong>TIMED ADMISSION or ROUTINE CALL</strong> until the rest break is complete.</li><li>A crew will not be allocated to a <strong>YELLOW </strong>until the rest break is complete. </li><li>If a crew reach the mid-point of the rest break window without commencing their rest break, they will no longer be allocated to an <strong>AMBER </strong>until the rest break is complete. </li><li>Crews will only be allocated to a <strong>PURPLE</strong> or <strong>RED</strong> inter facility transfer where there is no other resource immediately available. In practice this means where the alternative resource is under 10 mins away.</li></ul><p>",
     "keywords": [
@@ -788,7 +764,7 @@
   },
   {
     "filename": "Rest Break SOP.docx",
-    "paragraph": 25,
+    "paragraph": 22,
     "type": "text",
     "content": "<strong>Protection After a Rest Break Window </strong></p><ul><li>A crew will not be allocated to a <strong>TIMED ADMISSION or ROUTINE CALL</strong> until the rest break is complete.  </li><li>A crew will not be allocated to a <strong>YELLOW</strong> until the rest break is complete. </li><li>A crew will not be allocated to an <strong>AMBER </strong>incident until the rest break is complete.</li><li>Crews must be disturbed for an ILT call (if they are the nearest and most appropriate resource), but will only be allocated to a <strong>PURPLE</strong> or <strong>RED</strong> inter facility transfer where there is no other resource immediately available.</li></ul><p><em>NOTE:</em> <em>An interfacility transfer is also known as a hospital-to-hospital transfer.</em></p><p>",
     "keywords": [
@@ -852,9 +828,9 @@
   },
   {
     "filename": "Rest Break SOP.docx",
-    "paragraph": 26,
+    "paragraph": 23,
     "type": "text",
-    "content": "<strong>Special Break Protection</strong></p><p>A Special Break is irrefusable in two scenarios within a shift:</p><ol><li>If a crew have not been rested by at the end of the first rest break window, they can request a <strong>Special Break</strong> for additional protection.",
+    "content": "<strong>Special Break Protection</strong></p><p>A Special Break is irrefusable in two scenarios within a shift:</p><ol><li>If a crew have not been rested by at the end of the first rest break window, they can request a <strong>Special Break</strong> for additional protection. Normally, this means they <strong>take the remaining rest break time owed during the shift</strong>.</li></ol><p><strong>Exception:</strong> If taking the full balance would leave the crew with <strong>more than 6 hours left to work</strong>, they only take the <strong>first break balance now</strong>, and the second break will happen in the next window. </p><ol><li>A Special Break can also be requested if it has been <strong>over 6 hours since the end of the last rest break</strong>, and the crew still <strong>have break time owed</strong>.</li></ol><p>Once special break protection is applied the crew will only be sent to <strong>purple coded incidents or major incidents</strong> until their owed break time is complete.</p><p>A graphic of these levels of protection can be found below: </p><p>",
     "keywords": [
       "special",
       "break",
@@ -877,16 +853,7 @@
       "special",
       "break",
       "additional",
-      "protection"
-    ],
-    "image": "images/TestImage.png"
-  },
-  {
-    "filename": "Rest Break SOP.docx",
-    "paragraph": 27,
-    "type": "text",
-    "content": "Normally, this means they <strong>take the remaining rest break time owed during the shift</strong>.</li></ol><p><strong>Exception:</strong> If taking the full balance would leave the crew with <strong>more than 6 hours left to work</strong>, they only take the <strong>first break balance now</strong>, and the second break will happen in the next window.",
-    "keywords": [
+      "protection",
       "normally",
       "means",
       "they",
@@ -919,16 +886,7 @@
       "break",
       "happen",
       "next",
-      "window"
-    ],
-    "image": "images/TestImage.png"
-  },
-  {
-    "filename": "Rest Break SOP.docx",
-    "paragraph": 28,
-    "type": "text",
-    "content": "</p><ol><li>A Special Break can also be requested if it has been <strong>over 6 hours since the end of the last rest break</strong>, and the crew still <strong>have break time owed</strong>.</li></ol><p>Once special break protection is applied the crew will only be sent to <strong>purple coded incidents or major incidents</strong> until their owed break time is complete.</p><p>A graphic of these levels of protection can be found below: </p><p>",
-    "keywords": [
+      "window",
       "special",
       "break",
       "also",
@@ -974,7 +932,7 @@
   },
   {
     "filename": "Rest Break SOP.docx",
-    "paragraph": 29,
+    "paragraph": 24,
     "type": "text",
     "content": "<strong>Rest Break Disturbances </strong></p><ul><li>A crew will only be disturbed from a rest break for a coded, clinically triaged ILT or a Major Incident. </li><li>Dispatchers will make every effort to allocate or divert another resource, however, where there is no other response immediately available, a crew will have to be disturbed. In practice this means where the alternative resource is under 10 mins away.</li><li>If a crew has been disturbed when on a rest break, once clear from the incident, a crew will only be sent to <strong>purple coded incidents or major incidents</strong> until their owed break time is complete. </li></ul><p><strong>Exception:</strong> If taking the full balance would leave the crew with <strong>more than 6 hours left to work</strong>, they only take the <strong>first break balance now</strong>, and the second break will happen in the next window.</p><p>",
     "keywords": [
@@ -1065,7 +1023,7 @@
   },
   {
     "filename": "Rest Break SOP.docx",
-    "paragraph": 30,
+    "paragraph": 25,
     "type": "text",
     "content": "<strong>Special Break Disturbances </strong></p><ul><li>In the event a crew request a special break and are disturbed for a purple coded incident or major incident, once clear from the incident the crew will <strong>automatically be made unavailable until the owed break time is complete</strong>. </li></ul><p><em>Note: If there are two vehicles available on a station, one on a rest break and one in the final hour of their duty, then the crew on rest break should be allocated the call and the rest break SOP applied.</em></p>",
     "keywords": [
