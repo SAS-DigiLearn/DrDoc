@@ -10,13 +10,20 @@ let chunks = [];
 /* ---------- IMAGE MARKER SUPPORT ---------- */
 
 function extractImage(text) {
-  const match = text.match(/\[image:(.*?)\]/i);
+
+ 
+  const plain = text.replace(/<[^>]+>/g,"");
+
+  const match = plain.match(/\[image:(.*?)\]/i);
+
   if (!match) return null;
+
   return "images/" + match[1].trim();
+
 }
 
 function removeImageMarker(text) {
-  return text.replace(/\[image:.*?\]/i, "").trim();
+  return text.replace(/\[image:.*?\]/gi, "").trim();
 }
 
 /* ---------- KEYWORD EXTRACTION ---------- */
