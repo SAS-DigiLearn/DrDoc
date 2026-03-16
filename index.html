@@ -1,195 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SOP-Bot</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f8f9fa;
-      padding: 10px;
-    }
-    #chatbox {
-      background: white;
-      max-width: 800px;
-      margin: auto;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    .welcome {
-      background-color: #b91e71;
-      color: #fff;
-      text-align: left;
-      padding: 10px;
-      border-radius: 5px;
-    }
-    .message {
-      margin: 10px 0;
-      padding: 10px;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-    }
-    .bot {
-      background-color: #FCE8F2;
-      color: #000;
-      text-align: left;
-      margin-right: 10%;
-    }
-    .user {
-      background-color: #e9ecef;
-      color: #212529;
-      text-align: right;
-      margin-left: 10%;
-    }
-    .buttons {
-      margin-top: 10px;
-      text-align: center;
-    }
-    button {
-      padding: 8px 15px;
-      margin: 5px;
-      background-color: #b91e71;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .tip-image {
-      max-width: 100%;
-      border-radius: 8px;
-      margin-top: 5px;
-    }
-    input[type="text"] {
-      padding: 10px;
-      width: 70%;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    .highlight {
-      font-weight: bold;
-      
-    }
-  </style>
-</head>
-<body>
-  <div id="chatbox">
-    <div class="message bot">Howdy, I'm <strong>SOP-Bot</strong>. What can I help you with today?</div>
-    <div id="messages"></div>
-    <input type="text" id="userInput" placeholder="Type your question here">
-    <button onclick="handleUserQuestion()">Send</button>
-  </div>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
+<title>SOP-Bot</title>
+
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
+
+<style>
+
+body {
+font-family: Arial;
+background:#f8f9fa;
+padding:10px;
+}
+
+#chatbox{
+background:white;
+max-width:800px;
+margin:auto;
+padding:15px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.message{
+margin:10px 0;
+padding:10px;
+border-radius:8px;
+border:1px solid #dee2e6;
+}
+
+.bot{
+background:#FCE8F2;
+margin-right:10%;
+}
+
+.user{
+background:#e9ecef;
+margin-left:10%;
+text-align:right;
+}
+
+button{
+padding:8px 15px;
+background:#b91e71;
+color:white;
+border:none;
+border-radius:5px;
+cursor:pointer;
+}
+
+input{
+padding:10px;
+width:70%;
+border-radius:5px;
+border:1px solid #ccc;
+}
+
+.highlight{
+font-weight:bold;
+}
+
+.tip-image{
+max-width:100%;
+border-radius:8px;
+margin-top:6px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="chatbox">
+
+<div class="message bot">
+Howdy, I'm <b>SOP-Bot</b>. What can I help you with today?
+</div>
+
+<div id="messages"></div>
+
+<input id="userInput" placeholder="Type your question">
+<button onclick="handleUserQuestion()">Send</button>
+
+</div>
 
 <script>
-const messagesDiv = document.getElementById('messages');
-let knowledge = [];
 
-async function loadKnowledge() {
-  const res = await fetch('./data/knowledge.json');
-  knowledge = await res.json();
+let knowledge=[];
+let fuse;
+
+/* ---------- SYNONYM MAP ---------- */
+
+const synonyms={
+login:["log in","sign in","signin"],
+password:["passcode","credential"],
+reset:["change","update","recover"],
+account:["profile","user"]
+};
+
+/* ---------- EXPAND QUERY ---------- */
+
+function expandQuery(query){
+
+let words=query.toLowerCase().split(/\s+/);
+let expanded=[...words];
+
+words.forEach(w=>{
+if(synonyms[w]){
+expanded.push(...synonyms[w]);
+}
+});
+
+return expanded.join(" ");
+}
+
+/* ---------- LOAD KNOWLEDGE ---------- */
+
+async function loadKnowledge(){
+
+const res=await fetch("./data/knowledge.json");
+knowledge=await res.json();
+
+fuse=new Fuse(knowledge,{
+keys:["content","keywords"],
+threshold:0.35,
+includeScore:true,
+ignoreLocation:true
+});
+
 }
 
 loadKnowledge();
 
-function appendMessage(text, sender) {
-  const msg = document.createElement('div');
-  msg.className = 'message ' + sender;
-  const safeHTML = DOMPurify.sanitize(text);
-  msg.innerHTML = safeHTML;
-  messagesDiv.appendChild(msg);
+/* ---------- UI HELPERS ---------- */
+
+function appendMessage(text,sender){
+
+const msg=document.createElement("div");
+msg.className="message "+sender;
+
+msg.innerHTML=DOMPurify.sanitize(text);
+
+document.getElementById("messages").appendChild(msg);
+
 }
 
-function scoreResult(text, keywords) {
-  let score = 0;
-  const lower = text.toLowerCase();
-  keywords.forEach(k => {
-    if (lower.includes(k)) score += 5;
-  });
-  return score;
-}
+/* ---------- HIGHLIGHT ---------- */
 
-function highlight(text, keywords) {
-  keywords.forEach(k => {
-    const regex = new RegExp(`(${k})`, 'gi');
-    text = text.replace(regex, '<span class="highlight">$1</span>');
-  });
-  return text;
-}
+function highlight(text,query){
 
-function stripHTML(html) {
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  return div.textContent || "";
-}
+query.split(/\s+/).forEach(word=>{
 
-async function handleUserQuestion() {
-  const input = document.getElementById('userInput');
-  const query = input.value.trim();
-  if (!query) return;
+const regex=new RegExp(`(${word})`,"gi");
 
-  appendMessage(query, 'user'); // show user's question
-  input.value = '';
+text=text.replace(regex,"<span class='highlight'>$1</span>");
 
-  const keywords = query.toLowerCase().split(/\s+/);
-
-  const scored = knowledge.map(p => ({
-    ...p,
-    score: scoreResult(
-      p.type === 'table' ? stripHTML(p.content) : p.content,
-      keywords
-    )
-  }))
-  .filter(r => r.score > 0)
-  .sort((a, b) => b.score - a.score)
-  .slice(0, 2);
-
-  if (scored.length === 0) {
-    appendMessage("Sorry, I couldn't find anything related.", 'bot');
-    return;
-  }
-
-  scored.forEach((result, index) => {
-
-    let displayContent = "";
-
-    if (result.type === 'table') {
-      displayContent = result.content;
-    } else {
-      const sentences = result.content.match(/[^.!?]+[.!?]+/g) || [result.content];
-      const bestSentence = sentences.find(s =>
-        keywords.some(k => s.toLowerCase().includes(k))
-      ) || sentences[0];
-
-      displayContent = highlight(bestSentence, keywords);
-    }
-
-    let imageHTML = "";
-    if (result.image) {
-      imageHTML = `<img src="${result.image}" class="tip-image">`;
-    }
-
-    appendMessage(`
-      <div>
-        <p><b>Result ${index + 1}:</b></p>
-        ${displayContent}
-        ${imageHTML}
-        <small><b>${result.filename}</b> - paragraph ${result.paragraph}</small>
-        ${index < scored.length - 1 ? '<hr>' : ''}
-      </div>
-    `, 'bot');
-
-  });
-}
-
-document.getElementById('userInput').addEventListener("keypress", function(event) {
-  if (event.key === "Enter") {
-    event.preventDefault();
-    handleUserQuestion();
-  }
 });
+
+return text;
+
+}
+
+/* ---------- SEARCH ---------- */
+
+function handleUserQuestion(){
+
+const input=document.getElementById("userInput");
+const query=input.value.trim();
+
+if(!query) return;
+
+appendMessage(query,"user");
+
+input.value="";
+
+const expanded=expandQuery(query);
+
+const results=fuse.search(expanded)
+.slice(0,3)
+.map(r=>r.item);
+
+if(results.length===0){
+
+appendMessage("Sorry, I couldn't find anything related.","bot");
+return;
+
+}
+
+results.forEach((result,i)=>{
+
+let content=highlight(result.content,query);
+
+let imageHTML="";
+
+if(result.image){
+imageHTML=`<img src="${result.image}" class="tip-image">`;
+}
+
+appendMessage(`
+<div>
+<p><b>Result ${i+1}</b></p>
+${content}
+${imageHTML}
+<br>
+<small><b>${result.filename}</b></small>
+</div>
+`,"bot");
+
+});
+
+}
+
+/* ---------- ENTER KEY ---------- */
+
+document.getElementById("userInput")
+.addEventListener("keypress",function(e){
+
+if(e.key==="Enter"){
+e.preventDefault();
+handleUserQuestion();
+}
+
+});
+
 </script>
 
 </body>
