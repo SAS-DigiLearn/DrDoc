@@ -93,14 +93,13 @@ async function extractDOCX(file) {
         const filename = "img_" + Date.now() + "." + image.contentType.split("/")[1];
         const filepath = "./images/" + filename;
 
-        return image.read("base64").then(function(imageBuffer) {
+     return image.readAsBuffer().then(function(buffer) {
 
-          const buffer = Buffer.from(imageBuffer, "base64");
-          fs.writeFileSync(filepath, buffer);
+  fs.writeFileSync(filepath, buffer);
 
-          return {
-            src: "images/" + filename
-          };
+  return {
+    src: "images/" + filename
+  };
 
         });
 
