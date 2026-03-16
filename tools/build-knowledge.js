@@ -34,19 +34,19 @@ function extractKeywords(text) {
     .filter(w => w.length > 3 && !stopwords.has(w));
 }
 
-/* ---------- SENTENCE CHUNKING ---------- */
+/* ---------- OPTIONAL LONG PARAGRAPH CHUNKING ---------- */
 
 function chunkText(text) {
   const sentences = text.split(/(?<=[.!?])\s+/);
   return sentences
     .map(s => s.trim())
-    .filter(s => s.length > 40);
+    .filter(s => s.length > 40); // keep sentences longer than 40 chars
 }
 
-/* ---------- DOCX EXTRACTION (IMPROVED) ---------- */
+/* ---------- DOCX EXTRACTION ---------- */
 
 async function extractDOCX(file) {
-  // Convert DOCX to HTML (preserves tables and formatting)
+  // Convert DOCX to HTML to preserve tables and formatting
   const result = await mammoth.convertToHtml({ path: file });
   const html = result.value;
 
@@ -67,8 +67,7 @@ async function extractDOCX(file) {
   /* ---------- REMOVE TABLES FROM HTML ---------- */
   const htmlWithoutTables = html.replace(tableRegex, "");
 
-  /* ---------- EXTRACT [para] PARAGRAPHS WITH FORMATTING ---------- */
-  // Split by [para] marker, but keep HTML tags inside
+  /* ---------- EXTRACT [para] PARAGRAPHS (PRESERVE FORMATTING) ---------- */
   const paraRegex = /\[para\](.*?)(?=\[para\]|$)/gis;
   let match;
   while ((match = paraRegex.exec(htmlWithoutTables)) !== null) {
@@ -78,16 +77,22 @@ async function extractDOCX(file) {
     const image = extractImage(paragraphHTML);
     const cleanHTML = removeImageMarker(paragraphHTML);
 
-    items.push({
-      type: "text",
-      content: cleanHTML,  // HTML formatting preserved
-      image: image,
-      keywords: extractKeywords(cleanHTML.replace(/<[^>]+>/g, "")) // keywords on text only
+    // Only chunk very long paragraphs; otherwise keep as one block
+    const chunked = cleanHTML.length > 1000 ? chunkText(cleanHTML).map(s => s) : [cleanHTML];
+
+    chunked.forEach(c => {
+      items.push({
+        type: "text",
+        content: c,
+        image: image,
+        keywords: extractKeywords(c.replace(/<[^>]+>/g, "")) // keywords on text only
+      });
     });
   }
 
   return items;
 }
+
 /* ---------- PDF EXTRACTION ---------- */
 
 async function extractPDF(file) {
@@ -98,8 +103,9 @@ async function extractPDF(file) {
   let items = [];
 
   paragraphs.forEach(p => {
-    const chunked = chunkText(p);
+    const chunked = p.length > 1000 ? chunkText(p) : [p.trim()];
     chunked.forEach(c => {
+      if (!c) return;
       items.push({
         type: "text",
         content: c,
@@ -124,6 +130,7 @@ async function run() {
     if (file.endsWith(".docx")) {
       items = await extractDOCX(path);
     }
+
     if (file.endsWith(".pdf")) {
       items = await extractPDF(path);
     }
