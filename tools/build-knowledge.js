@@ -49,7 +49,7 @@ async function extractDOCX(file) {
     }
   );
 let html = result.value;
-html = html.replace(/<img /g, '<img class="tip-image" ');
+html = html.replace(/<img /g, '<img class="tip-image" alt="SOP image" ');
 
   let items = [];
 
