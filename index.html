@@ -289,7 +289,7 @@ function handleUserQuestion() {
     threshold: 0.45,        // slightly higher to tolerate extra words
     ignoreLocation: true,
     includeScore: true
-  }).slice(0,2).map(r => r.item);
+  }).slice(0,4).map(r => r.item);
 
   /* ---------- HANDLE NO RESULTS ---------- */
   if (results.length === 0) {
