@@ -33,53 +33,39 @@ function chunkText(text) {
 
 /* ---------- DOCX EXTRACTION ---------- */
 
+/* ---------- DOCX EXTRACTION ---------- */
+
 async function extractDOCX(file) {
 
   const result = await mammoth.convertToHtml(
     { path: file },
     {
-     convertImage: mammoth.images.imgElement(function(image) {
-  return image.read("base64").then(function(imageBuffer) {
-    return {
-      src: `data:${image.contentType};base64,${imageBuffer}`,
-      class: "tip-image"
-    };
-  });
-})
+      convertImage: mammoth.images.imgElement(function(image) {
+        return image.read("base64").then(function(imageBuffer) {
+          return {
+            src: `data:${image.contentType};base64,${imageBuffer}`,
+            class: "tip-image"
+          };
+        });
+      })
     }
   );
-let html = result.value;
-html = html.replace(/<img /g, '<img class="tip-image" alt="SOP image" ');
+
+  // Add image class and alt text
+  let html = result.value;
+  html = html.replace(/<img /g, '<img class="tip-image" alt="SOP image" ');
 
   let items = [];
 
-  /* ---------- EXTRACT TABLES ---------- */
-
-  const tableRegex = /<table[\s\S]*?<\/table>/gi;
-  const tables = html.match(tableRegex) || [];
-
-  tables.forEach(t => {
-    const styledTable = t.replace("<table", "<table class='sop-table'");
-    items.push({
-      type: "table",
-      content: styledTable
-    });
-  });
-
-  /* ---------- REMOVE TABLES FROM HTML ---------- */
-
-  const htmlWithoutTables = html.replace(tableRegex, "");
-
-  /* ---------- EXTRACT PARAGRAPHS ---------- */
+  /* ---------- PROCESS PARAGRAPHS WITH TABLES INLINE ---------- */
+  // Add class to all tables
+  html = html.replace(/<table/g, '<table class="sop-table"');
 
   const paraRegex = /\[para\](.*?)(?=\[para\]|$)/gis;
-
   let match;
 
-  while ((match = paraRegex.exec(htmlWithoutTables)) !== null) {
-
+  while ((match = paraRegex.exec(html)) !== null) {
     let paragraphHTML = match[1].trim();
-
     if (!paragraphHTML) continue;
 
     const chunked = paragraphHTML.length > 2000
@@ -87,20 +73,16 @@ html = html.replace(/<img /g, '<img class="tip-image" alt="SOP image" ');
       : [paragraphHTML];
 
     chunked.forEach(c => {
-
       items.push({
-        type: "text",
+        type: "text",           // tables remain inline with text
         content: c,
         keywords: extractKeywords(c.replace(/<[^>]+>/g,""))
       });
-
     });
-
   }
 
   return items;
 }
-
 /* ---------- PDF EXTRACTION ---------- */
 
 async function extractPDF(file) {
