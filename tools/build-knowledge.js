@@ -7,56 +7,6 @@ const output = "./data/knowledge.json";
 
 let chunks = [];
 
-/* ---------- IMAGE MARKER SUPPORT ---------- */
-
-function extractImage(text) {
-
-  const plain = text.replace(/<[^>]+>/g,"");
-
-  const match = plain.match(/\[image:(.*?)\]/i);
-
-  if (!match) return null;
-
-  return "images/" + match[1].trim();
-
-}
-
-function removeImageMarker(text) {
-  return text.replace(/\[image:.*?\]/gi, "").trim();
-}
-
-/* ---------- EMBEDDED WORD IMAGE EXTRACTION ---------- */
-
-function extractEmbeddedImages(html){
-
-  const imgRegex = /<img[^>]+src="data:image\/([^;]+);base64,([^"]+)"/gi;
-
-  let images=[];
-  let match;
-
-  while((match=imgRegex.exec(html))!==null){
-
-    const ext = match[1];
-    const base64 = match[2];
-
-    const filename = `img_${Math.random().toString(36).substring(2,10)}.${ext}`;
-    const path = `images/${filename}`;
-
-    const buffer = Buffer.from(base64,"base64");
-
-    fs.writeFileSync(`./${path}`,buffer);
-
-    images.push({
-      original:match[0],
-      replacement:`<img src="${path}" class="tip-image">`
-    });
-
-  }
-
-  return images;
-
-}
-
 /* ---------- KEYWORD EXTRACTION ---------- */
 
 function extractKeywords(text) {
@@ -89,20 +39,11 @@ async function extractDOCX(file) {
     { path: file },
     {
       convertImage: mammoth.images.imgElement(function(image) {
-
-        const filename = "img_" + Date.now() + "." + image.contentType.split("/")[1];
-        const filepath = "./images/" + filename;
-
-     return image.readAsBuffer().then(function(buffer) {
-
-  fs.writeFileSync(filepath, buffer);
-
-  return {
-    src: "images/" + filename
-  };
-
+        return image.read("base64").then(function(imageBuffer) {
+          return {
+            src: `data:${image.contentType};base64,${imageBuffer}`
+          };
         });
-
       })
     }
   );
@@ -128,7 +69,7 @@ async function extractDOCX(file) {
 
   const htmlWithoutTables = html.replace(tableRegex, "");
 
-  /* ---------- EXTRACT [para] PARAGRAPHS ---------- */
+  /* ---------- EXTRACT PARAGRAPHS ---------- */
 
   const paraRegex = /\[para\](.*?)(?=\[para\]|$)/gis;
 
@@ -140,19 +81,15 @@ async function extractDOCX(file) {
 
     if (!paragraphHTML) continue;
 
-    const image = extractImage(paragraphHTML);
-    const cleanHTML = removeImageMarker(paragraphHTML);
-
-    const chunked = cleanHTML.length > 2000
-      ? chunkText(cleanHTML)
-      : [cleanHTML];
+    const chunked = paragraphHTML.length > 2000
+      ? chunkText(paragraphHTML)
+      : [paragraphHTML];
 
     chunked.forEach(c => {
 
       items.push({
         type: "text",
         content: c,
-        image: image,
         keywords: extractKeywords(c.replace(/<[^>]+>/g,""))
       });
 
@@ -161,8 +98,8 @@ async function extractDOCX(file) {
   }
 
   return items;
-
 }
+
 /* ---------- PDF EXTRACTION ---------- */
 
 async function extractPDF(file) {
@@ -230,8 +167,6 @@ async function run() {
         content:item.content,
         keywords:item.keywords
       };
-
-      if(item.image) entry.image=item.image;
 
       chunks.push(entry);
 
