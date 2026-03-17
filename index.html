@@ -205,7 +205,7 @@ function appendMessage(htmlContent,sender){
 
 msg.innerHTML = DOMPurify.sanitize(htmlContent,{
   ALLOWED_TAGS: allowedTags,
-  ALLOWED_ATTR: ['src','class']
+  ALLOWED_ATTR: ['src','class','alt']
 });
 
 // 👇 ADD THIS BLOCK
