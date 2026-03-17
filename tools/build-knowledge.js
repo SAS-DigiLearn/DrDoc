@@ -38,13 +38,14 @@ async function extractDOCX(file) {
   const result = await mammoth.convertToHtml(
     { path: file },
     {
-      convertImage: mammoth.images.imgElement(function(image) {
-        return image.read("base64").then(function(imageBuffer) {
-          return {
-            src: `data:${image.contentType};base64,${imageBuffer}`
-          };
-        });
-      })
+     convertImage: mammoth.images.imgElement(function(image) {
+  return image.read("base64").then(function(imageBuffer) {
+    return {
+      src: `data:${image.contentType};base64,${imageBuffer}`,
+      class: "tip-image"
+    };
+  });
+})
     }
   );
 
