@@ -48,8 +48,8 @@ async function extractDOCX(file) {
 })
     }
   );
-
-  const html = result.value;
+let html = result.value;
+html = html.replace(/<img /g, '<img class="tip-image" ');
 
   let items = [];
 
