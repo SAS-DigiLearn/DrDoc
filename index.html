@@ -246,39 +246,68 @@ setTimeout(() => {
 
 /* ---------- SEARCH ---------- */
 
-function handleUserQuestion(){
-  const input=document.getElementById("userInput");
-  const query=input.value.trim();
+function handleUserQuestion() {
+  const input = document.getElementById("userInput");
+  const query = input.value.trim();
+  if (!query) return;
 
-  if(!query) return;
+  // Show the refresh button after first question
+  const btn = document.getElementById("refreshBtn");
+  if (btn.style.display === "none") {
+    btn.style.display = "inline-block";
+  }
 
-  appendMessage(query,"user");
-  document.getElementById("refreshBtn").style.display = "inline-block";
-  input.value="";
+  appendMessage(query, "user");
+  input.value = "";
 
-  const expanded=expandQuery(query);
+  /* ---------- PREPROCESS QUERY ---------- */
+  // Remove common conversational words and stopwords
+  const stopwords = new Set([
+    "the","and","for","are","with","that","this","from","your",
+    "have","will","into","you","can","not","use","how","when",
+    "tell","me","about","what","is","of","do","i","please"
+  ]);
 
-  const results=fuse.search(expanded)
-    .slice(0,3)
-    .map(r=>r.item);
+  const cleanedWords = query
+    .toLowerCase()
+    .replace(/[^\w\s]/g,"")
+    .split(/\s+/)
+    .filter(w => !stopwords.has(w));
 
-  if(results.length===0){
-    appendMessage("Sorry, I couldn't find anything related.","bot");
+  // Expand synonyms
+  let expandedWords = [...cleanedWords];
+  cleanedWords.forEach(w => {
+    if (synonyms[w]) {
+      expandedWords.push(...synonyms[w]);
+    }
+  });
+
+  const expandedQuery = expandedWords.join(" ");
+
+  /* ---------- SEARCH WITH FUSE ---------- */
+  const results = fuse.search(expandedQuery, {
+    threshold: 0.45,        // slightly higher to tolerate extra words
+    ignoreLocation: true,
+    includeScore: true
+  }).slice(0,3).map(r => r.item);
+
+  /* ---------- HANDLE NO RESULTS ---------- */
+  if (results.length === 0) {
+    appendMessage("Sorry, I couldn't find anything related.", "bot");
     return;
   }
 
-results.forEach((result,i)=>{
-
-  appendMessage(`
-    <div>
-      <p><b>Result ${i+1}</b></p>
-      ${result.content}
-      <br>
-      <small><b>${result.filename}</b></small>
-    </div>
-  `,"bot");
-
-});
+  /* ---------- DISPLAY RESULTS ---------- */
+  results.forEach((result, i) => {
+    appendMessage(`
+      <div>
+        <p><b>Result ${i+1}</b></p>
+        ${result.content}
+        <br>
+        <small><b>${result.filename}</b></small>
+      </div>
+    `, "bot");
+  });
 }
 
 /* ---------- ENTER KEY ---------- */
