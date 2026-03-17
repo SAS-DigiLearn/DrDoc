@@ -133,8 +133,14 @@ input{
 
 <div id="chatbox">
 
-<div class="message bot">
-Howdy, I'm <b>Sir SOP</b>. What can I help you with today?
+<div class="message bot" id="introMessage">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <span>Howdy, I'm <b>Sir SOP</b>. What can I help you with today?</span>
+    
+    <button id="refreshBtn" onclick="refreshChat()" style="display:none;">
+      🔄
+    </button>
+  </div>
 </div>
 
 <div id="messages"></div>
@@ -146,8 +152,13 @@ Howdy, I'm <b>Sir SOP</b>. What can I help you with today?
 
 <script>
 
+
 let knowledge=[];
 let fuse;
+
+function refreshChat(){
+  location.reload();
+}
 
 /* ---------- SYNONYM MAP ---------- */
 
@@ -229,6 +240,7 @@ function handleUserQuestion(){
   if(!query) return;
 
   appendMessage(query,"user");
+  document.getElementById("refreshBtn").style.display = "inline-block";
   input.value="";
 
   const expanded=expandQuery(query);
