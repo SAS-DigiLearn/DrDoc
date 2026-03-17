@@ -203,11 +203,19 @@ function appendMessage(htmlContent,sender){
     'img'
   ];
 
-  msg.innerHTML = DOMPurify.sanitize(htmlContent,{
-    ALLOWED_TAGS: allowedTags,
-    ALLOWED_ATTR: ['src','class']
-  });
+msg.innerHTML = DOMPurify.sanitize(htmlContent,{
+  ALLOWED_TAGS: allowedTags,
+  ALLOWED_ATTR: ['src','class']
+});
 
+// 👇 ADD THIS BLOCK
+setTimeout(() => {
+  const images = msg.querySelectorAll("img");
+
+  images.forEach(img => {
+    img.onclick = () => openModal(img.src);
+  });
+}, 0);
   document.getElementById("messages").appendChild(msg);
   messages.scrollTop = messages.scrollHeight;
 }
