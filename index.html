@@ -97,6 +97,35 @@ input{
   margin-bottom: 3px;
 }
 
+.img-modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  padding-top: 40px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.85);
+}
+
+.modal-content {
+  display: block;
+  margin: auto;
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+}
+
+.tip-image {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.tip-image:hover {
+  transform: scale(1.03);
+}
+
 </style>
 </head>
 
@@ -228,8 +257,20 @@ document.getElementById("userInput")
     handleUserQuestion();
   }
 });
+function openModal(src){
+  const modal = document.getElementById("imgModal");
+  const modalImg = document.getElementById("modalImg");
 
+  modal.style.display = "block";
+  modalImg.src = src;
+}
+
+function closeModal(){
+  document.getElementById("imgModal").style.display = "none";
+}
 </script>
-
+<div id="imgModal" class="img-modal" onclick="closeModal()">
+  <img id="modalImg" class="modal-content">
+</div>
 </body>
 </html>
