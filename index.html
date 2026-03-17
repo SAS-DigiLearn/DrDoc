@@ -167,8 +167,17 @@ function appendMessage(htmlContent,sender){
   const msg=document.createElement("div");
   msg.className="message "+sender;
 
-  const allowedTags = ['b','i','em','strong','ul','ol','li','p','br','table','thead','tbody','tr','th','td'];
-  msg.innerHTML=DOMPurify.sanitize(htmlContent,{ALLOWED_TAGS:allowedTags});
+  const allowedTags = [
+    'b','i','em','strong',
+    'ul','ol','li','p','br',
+    'table','thead','tbody','tr','th','td',
+    'img'
+  ];
+
+  msg.innerHTML = DOMPurify.sanitize(htmlContent,{
+    ALLOWED_TAGS: allowedTags,
+    ALLOWED_ATTR: ['src','class']
+  });
 
   document.getElementById("messages").appendChild(msg);
   messages.scrollTop = messages.scrollHeight;
@@ -196,24 +205,18 @@ function handleUserQuestion(){
     return;
   }
 
-  results.forEach((result,i)=>{
-    let content = result.content;
+results.forEach((result,i)=>{
 
-    let imageHTML = "";
-    if (result.image) {
-      imageHTML = `<img src="${result.image}" class="tip-image">`;
-    }
+  appendMessage(`
+    <div>
+      <p><b>Result ${i+1}</b></p>
+      ${result.content}
+      <br>
+      <small><b>${result.filename}</b></small>
+    </div>
+  `,"bot");
 
-    appendMessage(`
-      <div>
-        <p><b>Result ${i+1}</b></p>
-        ${content}
-        ${imageHTML}
-        <br>
-        <small><b>${result.filename}</b></small>
-      </div>
-    `,"bot");
-  });
+});
 }
 
 /* ---------- ENTER KEY ---------- */
