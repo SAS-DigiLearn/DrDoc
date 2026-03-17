@@ -466,7 +466,7 @@
     "filename": "Rest Break SOP.docx",
     "paragraph": 18,
     "type": "text",
-    "content": "<strong>Procedure </strong></p><p>Before and throughout rest period windows, operational crews will be protected from some incidents to prioritise a rest period as early as possible. Dispatchers within the Ambulance Control Centres will make every effort to allocate rest breaks at the earliest opportunity when rest period windows open in line with rest break windows. Crews will be returned to station as quickly as possible and should take the most direct route.</p><p>To ensure an appropriate response is maintained to the most time critical patients and major incidents, all staff as listed above will be required to remain available throughout their shift (except in the case of Special Break protection) for the following: </p><ul><li>All coded, clinically triaged ILT (Purple/Red) incidents</li><li>Major Incidents</li><li>SORT PDAs (SORT Teams only) </li></ul><p><em>Note – clinically triaged incidents are incidents coded using MPDS by call handlers, or outcome codes by the Integrated Clinical Hub or Specialist Service Desk. </em></p><p>This is described in the procedures below:</p><p>",
+    "content": "<strong>Procedure </strong></p><p>Before and throughout rest period windows, operational crews will be protected from some incidents to prioritise a rest period as early as possible. Dispatchers within the Ambulance Control Centres will make every effort to allocate rest breaks at the earliest opportunity when rest period windows open in line with rest break windows. Crews will be returned to station as quickly as possible and should take the most direct route.</p><p>To ensure an appropriate response is maintained to the most time critical patients and major incidents, all staff as listed above will be required to remain available throughout their shift (except in the case of Special Break protection) for the following: </p><ul><li>All coded, clinically triaged ILT (Purple/Red) incidents</li><li>Major Incidents</li><li>SORT PDAs (SORT Teams only) </li></ul><p><em>Note – clinically triaged incidents are incidents coded using MPDS by call handlers, or outcome codes by the Integrated Clinical Hub or Specialist Service Desk. </em></p><p>",
     "keywords": [
       "procedure",
       "before",
@@ -566,10 +566,7 @@
       "clinical",
       "specialist",
       "service",
-      "desk",
-      "described",
-      "procedures",
-      "below"
+      "desk"
     ]
   },
   {
@@ -813,7 +810,7 @@
     "filename": "Rest Break SOP.docx",
     "paragraph": 22,
     "type": "text",
-    "content": "<strong>Special Break Protection</strong></p><p>A Special Break is irrefusable in two scenarios within a shift:</p><p><strong>1. </strong>If a crew have not been rested by at the end of the first rest break window, they can request a <strong>Special Break</strong> for additional protection. Normally, this means they <strong>take the remaining rest break time owed during the shift</strong>.</p><p><strong>Exception:</strong> If taking the full balance would leave the crew with <strong>more than 6 hours left to work</strong>, they only take the <strong>first break balance now</strong>, and the second break will happen in the next window. </p><p><strong>2. </strong>A Special Break can also be requested if it has been <strong>over 6 hours since the end of the last rest break</strong>, and the crew still <strong>have break time owed</strong>.</p><p>",
+    "content": "<strong>Special Break Protection</strong></p><p>A Special Break is irrefusable in two scenarios within a shift:</p><p>1.<strong> </strong>If a crew have not been rested by at the end of the first rest break window, they can request a <strong>Special Break</strong> for additional protection. Normally, this means they <strong>take the remaining rest break time owed during the shift</strong>.</p><p><strong>Exception:</strong> If taking the full balance would leave the crew with <strong>more than 6 hours left to work</strong>, they only take the <strong>first break balance now</strong>, and the second break will happen in the next window. </p><p>2.<strong> </strong>A Special Break can also be requested if it has been <strong>over 6 hours since the end of the last rest break</strong>, and the crew still <strong>have break time owed</strong>.</p><p>",
     "keywords": [
       "special",
       "break",
